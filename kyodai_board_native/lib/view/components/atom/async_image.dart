@@ -46,7 +46,7 @@ class AsyncImage extends StatelessWidget{
       return placeholderWidget;
     }
     if(imageBuilder != null){
-      return imageBuilder(context, AssetImage(placeholderUrl));
+      return imageBuilder(context, NetworkImage(placeholderUrl));
     }
     return Image.network(placeholderUrl);
   }
@@ -56,7 +56,7 @@ class AsyncImage extends StatelessWidget{
       return errorWidget;
     }
     if(imageBuilder != null){
-      return imageBuilder(context, AssetImage(errorImageUrl));
+      return imageBuilder(context, NetworkImage(errorImageUrl));
     }
     return Image.network(errorImageUrl);
   }

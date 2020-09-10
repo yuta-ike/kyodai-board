@@ -1,19 +1,18 @@
 enum Freq{
-  almostEveryday,
-  fiveTimesPerWeek,
-  fourTimesPerWeek,
-  threeTimesPerWeek,
-  twicePerWeek,
-  oncePerWeek,
-  twicePerMonth,
-  oncePerMonth,
-  oncePerTwoMonth,
-  oncePerThreeMonth,
-  threeTimesPerYear,
-  oncePerHalfYear,
-  oncePerYear,
   moreRare,
-  others,
+  oncePerYear,
+  oncePerHalfYear,
+  threeTimesPerYear,
+  oncePerThreeMonth,
+  oncePerTwoMonth,
+  oncePerMonth,
+  twicePerMonth,
+  oncePerWeek,
+  twicePerWeek,
+  threeTimesPerWeek,
+  fourTimesPerWeek,
+  fiveTimesPerWeek,
+  almostEveryday,
 }
 
 Map<Freq, String> _map = {
@@ -31,7 +30,6 @@ Map<Freq, String> _map = {
   Freq.oncePerHalfYear: '半年に1回',
   Freq.oncePerYear: '1年に1回',
   Freq.moreRare: '1年に1回以下',
-  Freq.others: 'その他',
 };
 
 extension FreqString on Freq{

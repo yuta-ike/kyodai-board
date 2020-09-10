@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kyodai_board/model/value_objects/event_query/event_query.dart';
+import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:kyodai_board/repo/board_repo.dart';
 import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/organism/buttom_navigation/bottom_navigation.dart';
@@ -24,8 +24,8 @@ class EventResultPage extends HookWidget{
       tabState.value = tab.indexIsChanging ? TabState.transition : tab.index == 0 ? TabState.event : TabState.board;
     });
 
-    final state = useState(eventSearchProvider(query));
-    final events = useProvider(state.value);
+    final state = useState(eventScheduleProvider(query));
+    final schedules = useProvider(state.value);
 
     return Scaffold(
       appBar: AppBar(
@@ -46,16 +46,16 @@ class EventResultPage extends HookWidget{
       body: Center(
         child: RefreshIndicator(
           onRefresh: () async => print('refresh'),
-          child: events.when(
-            data: (events) => events.isEmpty
+          child: schedules.when(
+            data: (schedules) => schedules.isEmpty
               ? const Center(child: Text('該当するイベントはありませんでした'),)
               : ListView.builder(
                   itemBuilder: (context, index) =>
                     EventCard(
-                      events[index],
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute<EventScreen>(builder: (_) => EventScreen(events[index]))),
+                      event: schedules[index],
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute<EventScreen>(builder: (_) => EventScreen(schedule: schedules[index]))),
                     ),
-                  itemCount: events.length,
+                  itemCount: schedules.length,
                 ),
             loading: () => const Center(child: Text('loading')),
             error: (dynamic err, st){

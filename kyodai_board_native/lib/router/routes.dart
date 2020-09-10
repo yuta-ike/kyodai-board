@@ -11,6 +11,7 @@ class Routes{
   static String get boardsResult => '/boards/result';
   static String get chat => '/chat';
   static String get chatDetail => '/chat/detail';
+  static String get chatDetailTemporary => '/chat/temporary';
   static String get clubs => '/clubs';
   static String get clubsSearch => '/clubs/search';
   static String get clubsResult => '/clubs/result';

@@ -3,8 +3,19 @@ import 'package:kyodai_board/model/enums/campus.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
 import 'package:kyodai_board/model/enums/motivation.dart';
 import 'package:kyodai_board/model/enums/obligation.dart';
+import 'package:kyodai_board/model/util/day_of_week.dart';
 import 'package:kyodai_board/model/util/freq.dart';
 import 'package:kyodai_board/utils/dynamic_cast_map.dart';
+
+enum ContactType{
+  email, twitter, facebook, line, phone,
+}
+class ContactInfo{
+  const ContactInfo(this.contact, this.description, this.type);
+  final String contact;
+  final String description;
+  final ContactType type;
+}
 
 class ClubProfile{
   const ClubProfile({
@@ -14,7 +25,6 @@ class ClubProfile{
     @required this.imageUrl,
     @required this.iconImageUrl,
     @required this.clubType,
-    @required this.isSportsUnion,
     @required this.isOfficial,
     @required this.isIntercollege,
     @required this.isOnlyKU,
@@ -33,6 +43,7 @@ class ClubProfile{
     @required this.freq,
     // ignore: non_constant_identifier_names
     this.freq_display,
+    @required this.daysOfWeek,
     @required this.description,
     this.obligation,
     // ignore: non_constant_identifier_names
@@ -49,22 +60,8 @@ class ClubProfile{
     this.tripFreq,
     // ignore: non_constant_identifier_names
     this.trip_display,
-    this.publicEmail,
-    this.publicEmailDescription,
-    this.publicEmail2,
-    this.publicEmail2Description,
-    this.publicPhoneNumber,
-    this.publicPhoneNumberDescription,
-    this.twitterUrl,
-    this.twitterUrlDescription,
-    this.twitterUrl2,
-    this.twitterUrl2Description,
-    this.facebookUrl,
-    this.facebookUrlDescription,
-    this.lineId,
-    this.lineIdDescription,
-    this.lineId2,
-    this.lineId2Description,
+    this.contactInfo,
+    this.snsInfo,
   });
 
   ClubProfile.fromMap(Map<String, dynamic> map)
@@ -74,7 +71,6 @@ class ClubProfile{
     , imageUrl = map.getString('imageUrl')
     , iconImageUrl = map.getString('iconImageUrl')
     , clubType = map.getClubType('clubType')
-    , isSportsUnion = map.getBool('name')
     , isOfficial = map.getBool('isOfficial')
     , isIntercollege = map.getBool('isIntercollege')
     , isOnlyKU = map.getBool('isOnlyKU')
@@ -91,6 +87,7 @@ class ClubProfile{
     , campus = map.getCampus('campus')
     , freq = map.getFreq('freq')
     , freq_display = map.getString('freq_display')
+    , daysOfWeek = map.getDayOfWeeks('daysOfWeek')
     , obligation = map.getObligation('obligation')
     , obligation_display = map.getString('obligation_display')
     , motivation = map.getMotivation('motivation')
@@ -101,22 +98,18 @@ class ClubProfile{
     , drinking_display = map.getString('drinking_display')
     , tripFreq = map.getFreq('tripFreq')
     , trip_display = map.getString('trip_display')
-    , publicEmail = map.getString('publicEmail')
-    , publicEmailDescription = map.getString('publicEmailDescription')
-    , publicEmail2 = map.getString('publicEmail2')
-    , publicEmail2Description = map.getString('publicEmail2Description')
-    , publicPhoneNumber = map.getString('publicPhoneNumber')
-    , publicPhoneNumberDescription = map.getString('publicPhoneNumberDescription')
-    , twitterUrl = map.getString('twitterUrl')
-    , twitterUrlDescription = map.getString('twitterUrlDescription')
-    , twitterUrl2 = map.getString('twitter2Url')
-    , twitterUrl2Description = map.getString('twitter2UrlDescription')
-    , facebookUrl = map.getString('facebookUrl')
-    , facebookUrlDescription = map.getString('facebookUrlDescription')
-    , lineId = map.getString('lineId')
-    , lineIdDescription = map.getString('lineIdDescription')
-    , lineId2 = map.getString('lineId2')
-    , lineId2Description = map.getString('lineId2Description');
+    , contactInfo = [
+        ContactInfo(map.getString('publicEmail'), map.getString('publicEmailDescription'), ContactType.email),
+        ContactInfo(map.getString('publicEmail2'), map.getString('publicEmail2Description'), ContactType.email),
+        ContactInfo(map.getString('publicPhoneNumber'), map.getString('publicPhoneNumberDescription'), ContactType.phone),
+      ].where((info) => info.contact != null && info.contact.isNotEmpty).toList()
+    , snsInfo = [
+        ContactInfo(map.getString('twitterUrl'), map.getString('twitterUrlDescription'), ContactType.twitter),
+        ContactInfo(map.getString('twitter2Url'), map.getString('twitter2UrlDescription'), ContactType.twitter),
+        ContactInfo(map.getString('facebookUrl'), map.getString('facebookUrlDescription'), ContactType.facebook),
+        ContactInfo(map.getString('lineId'), map.getString('lineIdDescription'), ContactType.line),
+        ContactInfo(map.getString('lineId2'), map.getString('lineId2Description'), ContactType.line),
+      ].where((info) => info.contact != null && info.contact.isNotEmpty).toList();
 
   // 団体名
   final String name;
@@ -130,8 +123,6 @@ class ClubProfile{
   final String iconImageUrl;
   // 団体種別
   final ClubType clubType;
-  // 体育会か
-  final bool isSportsUnion;
   // 公認団体か
   final bool isOfficial;
   // インカレか
@@ -165,6 +156,8 @@ class ClubProfile{
   final Freq freq;
   // ignore: non_constant_identifier_names
   final String freq_display;
+  // 活動曜日
+  final List<DayOfWeek> daysOfWeek;
   // 原則全員参加・自由参加
   final Obligation obligation;
   // ignore: non_constant_identifier_names
@@ -188,20 +181,6 @@ class ClubProfile{
   final String trip_display;
 
   // 連絡先
-  final String publicEmail;
-  final String publicEmailDescription;
-  final String publicEmail2;
-  final String publicEmail2Description;
-  final String publicPhoneNumber;
-  final String publicPhoneNumberDescription;
-  final String twitterUrl;
-  final String twitterUrlDescription;
-  final String twitterUrl2;
-  final String twitterUrl2Description;
-  final String facebookUrl;
-  final String facebookUrlDescription;
-  final String lineId;
-  final String lineIdDescription;
-  final String lineId2;
-  final String lineId2Description;
+  final List<ContactInfo> contactInfo;
+  final List<ContactInfo> snsInfo;
 }

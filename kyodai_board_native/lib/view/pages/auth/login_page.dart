@@ -9,7 +9,7 @@ class LoginPage extends HookWidget{
     await navigator.pushReplacementNamed(Routes.mypage);
   }
 
-    void _loginApple(){
+  void _loginApple(){
     print('Appleでログイン');
   }
 

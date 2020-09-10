@@ -4,11 +4,12 @@ import 'package:kyodai_board/model/event.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
 
 class EventCard extends HookWidget{
-  const EventCard(this.event, {
+  const EventCard({
+    this.event,
     this.onTap,
   });
 
-  final Event event;
+  final EventBase event;
   final void Function() onTap;
 
   @override
@@ -29,6 +30,7 @@ class EventCard extends HookWidget{
                     height: 80,
                     child: AsyncImage(
                       imageUrl: event.imageUrl,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
@@ -67,38 +69,33 @@ class EventCard extends HookWidget{
                 ),
               ],
             ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
+            // Container(
+            //   decoration: BoxDecoration(
+            //     color: Colors.grey[100],
                 
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '毎週 月・水・金',
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.share),
-                        onPressed: () => print('share'),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.bookmark_border),
-                        onPressed: () => print('bookmark'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            //   ),
+            //   padding: const EdgeInsets.symmetric(horizontal: 16),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.end,
+            //     children: [
+            //       Row(
+            //         children: [
+            //           IconButton(
+            //             icon: const Icon(Icons.share),
+            //             onPressed: () => print('share'),
+            //           ),
+            //           IconButton(
+            //             icon: const Icon(Icons.bookmark_border),
+            //             onPressed: () => print('bookmark'),
+            //           ),
+            //         ],
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),
     );
   }
-  
 }

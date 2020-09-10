@@ -15,6 +15,7 @@ const Map<Campus, String> _map = {
 
 extension CampusString on Campus{
   String get format => _map[this];
+  String get keyString => toString().split('.')[1];
 }
 
 extension ConvertableMap on Map<String, dynamic>{

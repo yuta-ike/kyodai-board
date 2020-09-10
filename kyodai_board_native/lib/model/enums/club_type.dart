@@ -9,7 +9,7 @@ const Map<ClubType, String> _map = {
   ClubType.music: '音楽',
   ClubType.study: '研究',
   ClubType.business: 'ビジネス',
-  ClubType.job: 'アルバイト',
+  ClubType.job: 'アルバイト・インターン',
   ClubType.others: 'その他',
 };
 

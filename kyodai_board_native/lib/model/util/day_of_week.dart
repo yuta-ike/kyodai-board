@@ -22,6 +22,8 @@ Map<DayOfWeek, int> _intmap = {
   DayOfWeek.saturday: 6,
 };
 
+final _frommap = Map<String, DayOfWeek>.fromEntries(DayOfWeek.values.map((e) => MapEntry(e.toString().split('.')[1], e)));
+
 extension StringDayOfWeek on DayOfWeek{
   String get format => _map[this];
 }
@@ -35,5 +37,20 @@ extension SortIterable<DayOfWeek> on List<DayOfWeek>{
         final bid = (_intmap[b] - offset) % 7;
         return aid > bid ? 1 : aid == bid ? 0 : -1;
       });
+  }
+}
+
+extension ConvertableMap on Map<String, dynamic>{
+  List<DayOfWeek> getDayOfWeeks(String key, { List<DayOfWeek> or }){
+    final dynamic value = this[key];
+    try{
+      if(value is List<dynamic>){
+        return value.map((dynamic e) => _frommap[e as String]).toList();
+      }else{
+        return or;
+      }
+    }catch(e){
+      return or;
+    }
   }
 }

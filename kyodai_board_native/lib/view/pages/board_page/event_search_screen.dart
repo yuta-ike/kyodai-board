@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
 import 'package:kyodai_board/model/util/day_of_week.dart';
-import 'package:kyodai_board/model/value_objects/event_query/event_query.dart';
+import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:provider/provider.dart';
 
 class EventSearchScreen extends HookWidget{
-  const EventSearchScreen({ this.query });
+  const EventSearchScreen({ this.eventQuery });
 
-  final EventQuery query;
+  final EventQuery eventQuery;
 
   @override
   Widget build(BuildContext context) {
@@ -21,35 +21,21 @@ class EventSearchScreen extends HookWidget{
       body: SafeArea(
         child: SingleChildScrollView(
           child: ChangeNotifierProvider.value(
-            value: query,
+            value: eventQuery,
             builder: (context, _) => Container(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // SearchBox(
-                    //   hintText: '例: バスケットボール 体育会',
-                    //   autofocus: true,
-                    // ),
-
                     _buildHeader(context, '日付'),
-                    _buildChips<EventDateChoice>(context, {
+                    _buildDataChoiceChips(context, {
                       for (final e in EventDateChoice.values) e : e.format
                     }),
-                    // OutlineButton(
-                    //   onPressed: () => showDateRangePicker(
-                    //     context: context,
-                    //     firstDate: DateTime.now(),
-                    //     lastDate: DateTime.now().add(const Duration(days: 365))
-                    //   ),
-                    //   child: const Text('期間を選択'),
-                    // ),
+
                     _buildHeader(context, 'イベント種別'),
-                    _buildChips<ClubType>(context, {
+                    _buildMultiChoiceChips<ClubType>(context, {
                       for (final e in ClubType.values) e : e.format
                     }),
-
-                    const SizedBox(height: 16),
 
                     if(isDetail.value)
                       Container(
@@ -57,22 +43,25 @@ class EventSearchScreen extends HookWidget{
                         child: Column(
                           children: [
                             _buildHeader(context, '実施曜日'),
-                            _buildChips<DayOfWeek>(context, {
-                              for (final e in DayOfWeek.values) e : e.format
+                            _buildMultiChoiceChips<DayOfWeek>(context, {
+                              for (final e in DayOfWeek.values.sortInDayOrder(start: DayOfWeek.monday)) e : e.format
                             }),
-                            _buildHeader(context, '時間帯'),
-                            _buildChips<EventTime>(context, {
-                              for (final e in EventTime.values) e : e.format
-                            }),
+                            // TODO: 未実装
+                            // _buildHeader(context, '時間帯'),
+                            // _buildMultiChoiceChips<EventTime>(context, {
+                            //   for (final e in EventTime.values) e : e.format
+                            // }),
                           ]
                         ),
                       ),
-                    
+
+                    const SizedBox(height: 16),
+
                     RaisedButton(
                       color: Theme.of(context).accentColor,
                       textColor: Colors.white,
                       onPressed: (){
-                        Navigator.of(context).pop(query);
+                        Navigator.of(context).pop(eventQuery);
                       },
                       child: const Text('検索'),
                     ),
@@ -91,14 +80,50 @@ class EventSearchScreen extends HookWidget{
     );
   }
 
-  Widget _buildChips<T>(BuildContext context, Map<T, String> items) {
+Widget _buildDataChoiceChips(BuildContext context, Map<EventDateChoice, String> items) {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
       children: items.entries.map<Widget>((item) {
+        final isSelected = context.select<EventQuery, bool>((value) => value.dateChoice == item.key);
         return ChoiceChip(
-          label: Text(item.value),
-          selected: context.watch<EventQuery>().isSelected(item.key),
+          selectedColor: Colors.cyan,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          label: Text(
+            item.value,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black
+            ),
+          ),
+          selected: isSelected,
+          onSelected: (_) => context.read<EventQuery>().dateChoice = item.key,
+        );
+      }
+      ).toList(),
+    );
+  }
+
+  Widget _buildMultiChoiceChips<T>(BuildContext context, Map<T, String> items) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      children: items.entries.map<Widget>((item) {
+        final isSelected = context.watch<EventQuery>().isSelected(item.key);
+        return FilterChip(
+          avatar: isSelected ? null : Icon(
+              Icons.check,
+              size: 20,
+              color: Colors.grey[400],
+            ),
+          selectedColor: Colors.cyan,
+          checkmarkColor: Colors.white,
+          label: Text(
+            item.value,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black
+            ),
+          ),
+          selected: isSelected,
           onSelected: (_) => context.read<EventQuery>().toggle(item.key),
         );
       }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kyodai_board/firebase/firebase_auth.dart';
-import 'package:kyodai_board/model/value_objects/event_query/event_query.dart';
+import 'package:kyodai_board/model/value_objects/query/club_query.dart';
+import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:kyodai_board/view/pages/auth/login_page.dart';
 import 'package:kyodai_board/view/pages/board_page/board_page.dart';
 import 'package:kyodai_board/view/pages/board_page/event_search_screen.dart';
@@ -8,8 +9,16 @@ import 'package:kyodai_board/view/pages/board_result_page/event_result_page.dart
 import 'package:kyodai_board/view/pages/chat_page/chat_page.dart';
 import 'package:kyodai_board/view/pages/chat_page/chat_screen.dart';
 import 'package:kyodai_board/view/pages/club_page/club_page.dart';
+import 'package:kyodai_board/view/pages/club_page/club_search_screen.dart';
+import 'package:kyodai_board/view/pages/club_result_page/club_result_page.dart';
 import 'package:kyodai_board/view/pages/my_page/my_page.dart';
 import 'package:kyodai_board/view/pages/setting_page/setting_page.dart';
+
+class RouterProp<T>{
+  const RouterProp(this.arguments, { this.implicit = false });
+  final T arguments;
+  final bool implicit;
+}
 
 class Router {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -75,7 +84,7 @@ class Router {
           final query = settings.arguments as EventQuery;
           return MaterialPageRoute<EventQuery>(
             settings: const RouteSettings(name: '/boards/search'),
-            builder: (_) => EventSearchScreen(query: query),
+            builder: (_) => EventSearchScreen(eventQuery: query),
             fullscreenDialog: true,
           );
         
@@ -92,6 +101,23 @@ class Router {
             pageBuilder: (_, __, ___) => ClubPage(),
           );
 
+                  
+        case '/clubs/search':
+          final query = settings.arguments as ClubQuery;
+          return MaterialPageRoute<void>(
+            settings: const RouteSettings(name: '/clubs'),
+            builder: (_) => ClubSearchScreen(query: query),
+            fullscreenDialog: true,
+          );
+        
+        case '/clubs/result':
+          final query = settings.arguments as ClubQuery;
+          return MaterialPageRoute<void>(
+            settings: const RouteSettings(name: '/clubs'),
+            builder: (_) => ClubResultPage(query: query),
+            fullscreenDialog: true,
+          );
+
         case '/chat':
           return PageRouteBuilder<void>(
             settings: const RouteSettings(name: '/chat'),
@@ -99,10 +125,25 @@ class Router {
           );
 
         case '/chat/detail':
-          final chatId = settings.arguments as String;
+          final props = settings.arguments as RouterProp<String>;
+          if(props.implicit){
+            return PageRouteBuilder<void>(
+              settings: const RouteSettings(name: '/chat'),
+              pageBuilder: (_, __, ___) => ChatScreen(chatId: props.arguments),
+            );
+          }else{
+            return MaterialPageRoute<int>(
+              settings: const RouteSettings(name: '/chat'),
+              builder: (_) => ChatScreen(chatId: props.arguments),
+            );
+          }
+          break;
+        
+        case '/chat/temporary':
+          final clubId = settings.arguments as String;
           return MaterialPageRoute<int>(
             settings: const RouteSettings(name: '/chat'),
-            builder: (_) => ChatScreen(chatId),
+            builder: (_) => ChatScreen(clubId: clubId),
           );
 
         case '/settings':

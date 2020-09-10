@@ -22,20 +22,23 @@ extension on Map<String, dynamic>{
   }
 }
 
+// TODO: listをsetに置き換え
+
 class Club{
   const Club({
     @required this.id,
     @required this.accountType,
     @required this.isValid,
     @required this.isRegisterCompleted,
+    @required this.initialMessage,
     @required this.profile,
   });
 
-  Club.fromMap(Map<String, dynamic> map)
-    : id = map.getString('id')
-    , accountType = map.getAccoutType('accountType')
+  Club.fromMap(this.id, Map<String, dynamic> map)
+    : accountType = map.getAccoutType('accountType')
     , isValid = map.getBool('isValid')
     , isRegisterCompleted = map.getBool('isRegisterCompleted')
+    , initialMessage = 'こんにちは！気軽にチャットしてください！'
     , profile = ClubProfile.fromMap(map['profile'] as Map<String, dynamic>);
     
 
@@ -43,5 +46,6 @@ class Club{
   final AccountType accountType;
   final bool isValid;
   final bool isRegisterCompleted;
+  final String initialMessage;
   final ClubProfile profile;
 }

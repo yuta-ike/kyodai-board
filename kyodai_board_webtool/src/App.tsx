@@ -1,24 +1,25 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Form from './view/FormPage';
+import { Tabs, Tab } from 'grommet';
+import { clubModel, sendClub, randomGenClub } from './viewModel/club';
+import { scheduleModel, sendSchedule, randomGenSchedule } from './viewModel/schedule';
+import { eventModel, sendEvent, randomGenEvent } from './viewModel/event';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Tabs>
+        <Tab title="団体追加">
+          <Form key="1" data={clubModel} onClickSend={sendClub} randomGen={randomGenClub}/>
+        </Tab>
+        <Tab title="イベント追加">
+          <Form key="2" data={eventModel} onClickSend={sendEvent} randomGen={randomGenEvent} />
+        </Tab>
+        <Tab title="イベントスケジュール追加">
+          <Form key="2" data={scheduleModel} onClickSend={sendSchedule} randomGen={randomGenSchedule} />
+        </Tab>
+      </Tabs>
     </div>
   );
 }

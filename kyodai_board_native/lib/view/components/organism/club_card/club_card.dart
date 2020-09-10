@@ -3,10 +3,12 @@ import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
 
 class ClubCard extends StatelessWidget{
-  const ClubCard(this.club, { this.onTap });
+  const ClubCard(this.club, { this.isBookmarked, this.bookmark, this.onTap });
 
   final Club club;
   final void Function() onTap;
+  final void Function() bookmark;
+  final bool isBookmarked;
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +22,13 @@ class ClubCard extends StatelessWidget{
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(4),
                   child: SizedBox(
                     width: 80,
                     height: 80,
                     child: AsyncImage(
                       imageUrl: club.profile.imageUrl,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
@@ -85,8 +88,11 @@ class ClubCard extends StatelessWidget{
                         onPressed: () => print('share'),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.bookmark_border),
-                        onPressed: () => print('bookmark'),
+                        icon: Icon(
+                          isBookmarked ?? false ? Icons.bookmark : Icons.bookmark_border,
+                          color: isBookmarked ?? false ? Colors.cyan[600] : Colors.black,
+                        ),
+                        onPressed: isBookmarked == null ? null : bookmark,
                       ),
                     ],
                   ),

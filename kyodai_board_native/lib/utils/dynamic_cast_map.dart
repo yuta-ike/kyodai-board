@@ -12,13 +12,19 @@ extension DynamicCastMap on Map<String, dynamic>{
 
   String getString(String key, { String or }) => get<String>(key, or: or);
   int getInt(String key, { int or }) => get<int>(key, or: or);
-  double getDouble(String key, { double or }) => get<double>(key, or: or);
+  double getDouble(String key, { double or }) => get<double>(key, or: or) ?? getInt(key)?.toDouble() ?? or;
   bool getBool(String key, { bool or }) => get<bool>(key, or: or);
   List<T> getList<T>(String key, { List<T> or }){
     final dynamic value = this[key];
     if(value is List<dynamic>){
       try{
-        return value.cast<T>();
+        return value.map((dynamic e){
+          if(e is T){
+            return e;
+          }else{
+            throw Exception();
+          }
+        }).toList();
       }catch(e){
         return or;
       }
