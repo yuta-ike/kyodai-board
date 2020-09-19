@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kyodai_board/firebase/firebase_auth.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/model/club_bookmark.dart';
-import 'package:kyodai_board/model/event.dart';
 import 'package:kyodai_board/model/event_bookmark.dart';
 import 'package:kyodai_board/repo/firebase_repo.dart';
 
@@ -36,14 +35,14 @@ Future<void> unbookmarkClub(ClubBookmark bookmark) async {
 final bookmarkClubProvider = StreamProvider<List<ClubBookmark>>((ref) async* {
   final uid = auth.currentUser.uid;
   var bookmarks = <ClubBookmark>[];
-
+  print(uid);
   yield [];
 
   await for(final snapshot in fsinstance.collection('users').doc(uid).collection('bookmarkClubs').orderBy('createdAt').snapshots()){
     var hasChange = false;
     snapshot.docChanges.forEach((docChange){
       if(docChange.type == DocumentChangeType.added){
-        bookmarks.add(ClubBookmark.fromMap(docChange.doc.id, docChange.doc.data()));
+        bookmarks = [...bookmarks, (ClubBookmark.fromMap(docChange.doc.id, docChange.doc.data()))];
         hasChange = true;
       }else if(docChange.type == DocumentChangeType.removed){
         bookmarks = bookmarks.where((bookmark) => bookmark.id != docChange.doc.id).toList();

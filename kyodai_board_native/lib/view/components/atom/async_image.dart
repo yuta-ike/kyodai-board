@@ -38,6 +38,7 @@ class AsyncImage extends StatelessWidget{
       fit: fit,
       color: color,
       colorBlendMode: colorBlendMode,
+      useOldImageOnUrlChange: false,
     );
   }
 

@@ -16,7 +16,14 @@ class EventSearchScreen extends HookWidget{
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('イベント検索'),
+        toolbarHeight: 50,
+        title: Text(
+          'イベント検索',
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

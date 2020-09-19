@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/model/event.dart';
+import 'package:kyodai_board/model/event_bookmark.dart';
+import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
 
 class EventCard extends HookWidget{
@@ -9,11 +12,13 @@ class EventCard extends HookWidget{
     this.onTap,
   });
 
-  final EventBase event;
+  final Event event;
   final void Function() onTap;
 
   @override
   Widget build(BuildContext context) {
+    final bookmarks = useProvider(bookmarkEventProvider);
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -28,9 +33,12 @@ class EventCard extends HookWidget{
                   child: SizedBox(
                     width: 80,
                     height: 80,
-                    child: AsyncImage(
-                      imageUrl: event.imageUrl,
-                      fit: BoxFit.cover,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: AsyncImage(
+                        imageUrl: event.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
@@ -41,8 +49,47 @@ class EventCard extends HookWidget{
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(event.title),
-                        Text(event.hostName),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  event.hostName,
+                                  style: Theme.of(context).textTheme.caption.copyWith(
+                                      fontSize: 11,
+                                    ),
+                                ),
+                                Text(
+                                  event.title,
+                                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            bookmarks.when(
+                              loading: () => const Icon(Icons.bookmark_border),
+                              error: (dynamic _, __) => const Icon(Icons.bookmark_border),
+                              data: (bookmarks) {
+                                final isBookmarked = bookmarks.containsClubAndEventId(event.id, event.clubId);
+                                return InkWell(
+                                  onTap: () => isBookmarked ? unbookmarkEvent(bookmarks.getWithEventId(event.id)) : bookmarkEvent(event.id, event.clubId),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 3),
+                                    child: Icon(
+                                      isBookmarked ?? false ? Icons.bookmark : Icons.bookmark_border,
+                                      color: isBookmarked ?? false ? Colors.cyan[600] : Colors.black,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
@@ -62,6 +109,9 @@ class EventCard extends HookWidget{
                         Text(
                           event.description,
                           overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyText1.copyWith(
+                            fontSize: 13,
+                          ),
                         ),
                       ]
                     ),

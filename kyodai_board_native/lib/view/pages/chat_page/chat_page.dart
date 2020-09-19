@@ -2,6 +2,7 @@ import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kyodai_board/model/chat_room.dart';
 import 'package:kyodai_board/repo/chat_repo.dart';
 import 'package:kyodai_board/router/router.dart';
 import 'package:kyodai_board/router/routes.dart';
@@ -13,8 +14,8 @@ import 'package:kyodai_board/utils/date_extension.dart';
 
 class ChatPage extends HookWidget{
   
-  void _moveToChatroom(NavigatorState navigator, String chatId){
-    navigator.pushNamed(Routes.chatDetail, arguments: RouterProp(chatId) /*chat id */);
+  void _moveToChatroom(NavigatorState navigator, ChatRoom chatroom){
+    navigator.pushNamed(Routes.chatDetail, arguments: RouterProp(chatroom) /*chat id */);
   }
 
   @override
@@ -49,7 +50,7 @@ class ChatPage extends HookWidget{
                     itemBuilder: (context, index) {
                       final chatroom = chatrooms[index];
                       return InkWell(
-                        onTap: () => _moveToChatroom(Navigator.of(context), chatroom.id),
+                        onTap: () => _moveToChatroom(Navigator.of(context), chatroom),
                         child: Row(
                           children: [
                             AsyncImage(
@@ -83,8 +84,7 @@ class ChatPage extends HookWidget{
                                       badgeContent: Container(
                                         height: 5,
                                         width: 5,
-                                        decoration:
-                                            BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                                        decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
                                       ),
                                     ),
                                 ]

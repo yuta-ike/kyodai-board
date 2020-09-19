@@ -14,15 +14,25 @@ final boardProvider = FutureProvider.autoDispose((ref) async {
   return snapshots.docs.map((snapshot) => Board.fromMap(snapshot.data())).toList();
 });
 
-final scheduleProvider = FutureProvider.autoDispose((ref) async {
-  final firestore = ref.read(firestoreProvider);
-  final snapshots = await firestore.state.collectionGroup('schedules').orderBy('startAt').get();
-  return snapshots.docs.map((snapshot) => Schedule.fromMap(snapshot.id, snapshot.data())).toList();
-});
+class ScheduleListRepository extends StateNotifier<List<Schedule>>{
+  ScheduleListRepository(): super([]);
 
-final eventScheduleProvider = FutureProvider.autoDispose.family<List<Schedule>, EventQuery>((ref, eventQuery) async {
-    final firestore = ref.read(firestoreProvider);
-    var query = firestore.state.collectionGroup('schedules').orderBy('startAt');
+  Future<void> fetch() async {
+    final snapshots = await fsinstance.collectionGroup('schedules').orderBy('startAt').get();
+    state = snapshots.docs.map((snapshot) => Schedule.fromMap(snapshot.id, snapshot.data())).toList();
+  }
+}
+
+final scheduleProvider = StateNotifierProvider(
+  (ref) => ScheduleListRepository()
+);
+
+
+class ScheduleSearchListRepository extends StateNotifier<List<Schedule>>{
+  ScheduleSearchListRepository(): super([]);
+
+  Future<void> fetch(EventQuery eventQuery) async {
+    var query = fsinstance.collectionGroup('schedules').orderBy('startAt');
 
     if(eventQuery.getOnlyTrue<ClubType>().isNotEmpty){
       query = query.where('clubType', whereIn: eventQuery.getOnlyTrue<ClubType>().map((e) => e.keyString).toList());
@@ -41,8 +51,37 @@ final eventScheduleProvider = FutureProvider.autoDispose.family<List<Schedule>, 
     }
 
     final snapshots = await query.get();
-    return snapshots.docs.map((snapshot) => Schedule.fromMap(snapshot.id, snapshot.data())).toList();
-});
+    state =  snapshots.docs.map((snapshot) => Schedule.fromMap(snapshot.id, snapshot.data())).toList();
+  }
+}
+
+final scheduleSearchListProvider = StateNotifierProvider(
+  (ref) => ScheduleSearchListRepository()
+);
+
+// final eventScheduleProvider = FutureProvider.autoDispose.family<List<Schedule>, EventQuery>((ref, eventQuery) async {
+//     final firestore = ref.read(firestoreProvider);
+//     var query = firestore.state.collectionGroup('schedules').orderBy('startAt');
+
+//     if(eventQuery.getOnlyTrue<ClubType>().isNotEmpty){
+//       query = query.where('clubType', whereIn: eventQuery.getOnlyTrue<ClubType>().map((e) => e.keyString).toList());
+//     }
+
+//     final periods = eventQuery.dateChoice.getDatePeriod();
+//     if(periods != null){
+//       query = query
+//         .where('startAt', isGreaterThan: periods.start)
+//         .where('startAt', isLessThan: periods.end);
+//     }
+
+//     if(eventQuery.getOnlyTrue<DayOfWeek>().isNotEmpty){
+//       // dayOfWeeksフィールド追加待ち
+//       // query = query.where('type', whereIn: eventQuery.getOnlyTrue<ClubType>().map((e) => e.keyString).toList());
+//     }
+
+//     final snapshots = await query.get();
+//     return snapshots.docs.map((snapshot) => Schedule.fromMap(snapshot.id, snapshot.data())).toList();
+// });
 
 // イベント詳細を取得する
 class EventDetailRepository extends StateNotifier<Event>{

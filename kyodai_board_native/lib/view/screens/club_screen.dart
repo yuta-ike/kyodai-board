@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -34,10 +35,6 @@ class ClubScreen extends HookWidget{
 
   final Club _initClub;
   final String _clubId;
-
-  Future<void> _bookmark(Club club) async {
-    await bookmarkClub(club.id);
-  }
 
   void _moveToChatScreen(BuildContext context, String clubId){
     Navigator.pushNamed(context, Routes.chatDetailTemporary, arguments: clubId);
@@ -150,7 +147,12 @@ class ClubScreen extends HookWidget{
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(club.profile.name),
+                            Text(
+                              club.profile.name,
+                              style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                fontWeight: FontWeight.bold,
+                              )
+                            ),
                             Text(
                               club.profile.genre?.join(' '),
                               style: Theme.of(context).textTheme.caption,
@@ -251,12 +253,26 @@ class ClubScreen extends HookWidget{
               color: Colors.grey[200],
             ),
 
+            
             TabBar(
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: const BubbleTabIndicator(
+                indicatorHeight: 30,
+                tabBarIndicatorSize: TabBarIndicatorSize.tab,
+                indicatorColor: Colors.cyan,
+              ),
               controller: tabController,
               isScrollable: true,
-              labelColor: Colors.black,
+              labelColor: Colors.white,
+              labelStyle: const TextStyle(
+                textBaseline: TextBaseline.ideographic,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                textBaseline: TextBaseline.ideographic,
+              ),
+              unselectedLabelColor: Colors.black,
               tabs: const [
-                Tab(text: '活動内容'),
+                Tab(text: '活動'),
                 Tab(text: '雰囲気'),
                 Tab(text: 'イベント'),
                 Tab(text: 'タイムライン'),
@@ -264,6 +280,24 @@ class ClubScreen extends HookWidget{
                 Tab(text: 'SNS/連絡先'),
               ],
             ),
+
+            // TabBar(
+            //   controller: tabController,
+            //   isScrollable: true,
+            //   labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+            //   labelColor: Colors.black,
+            //   labelStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+            //     fontSize: 12,
+            //   ),
+            //   tabs: const [
+            //     Tab(text: '活動内容'),
+            //     Tab(text: '雰囲気'),
+            //     Tab(text: 'イベント'),
+            //     Tab(text: 'タイムライン'),
+            //     Tab(text: '情報'),
+            //     Tab(text: 'SNS/連絡先'),
+            //   ],
+            // ),
 
             Expanded(
               child: Column(
@@ -323,7 +357,7 @@ class ClubScreen extends HookWidget{
                               const Divider(),
                               _buildQandA(context, '男女比', '男：女 = ${club.profile.genderRatio.toFormatRatio()}'),
                               const Divider(),
-                              _buildQandA(context, '主に活動しているキャンパス（吉田キャンパス以外）', '${club.profile.campus.format}'),
+                              _buildQandA(context, '主に活動しているキャンパス', '${club.profile.campus.format}'),
                               const Divider(),
                               _buildQandA(context, '飲み会頻度', '${club.profile.drinkingFreq.format}'),
                               const Divider(),

@@ -1,7 +1,7 @@
+import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kyodai_board/model/enums/club_type.dart';
 import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:kyodai_board/model/event_bookmark.dart';
 import 'package:kyodai_board/repo/board_repo.dart';
@@ -9,7 +9,6 @@ import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/organism/board_card/impl/board_card.dart';
 import 'package:kyodai_board/view/components/organism/buttom_navigation/bottom_navigation.dart';
-import 'package:kyodai_board/view/components/organism/event_card/event_card.dart';
 import 'package:kyodai_board/view/components/organism/schedule_card/schedule_card.dart';
 import 'package:kyodai_board/view/screens/event_screen.dart';
 
@@ -29,8 +28,13 @@ class BoardPage extends HookWidget{
       tabState.value = tab.indexIsChanging ? TabState.transition : tab.index == 0 ? TabState.event : TabState.board;
     });
 
-    final schedules = useProvider(scheduleProvider);
+    final scheduleRepo = useProvider(scheduleProvider);
+    final schedules = scheduleRepo.state;
     final boards = useProvider(boardProvider);
+
+    useEffect((){
+      scheduleRepo.fetch();
+    }, []);
 
     final bookmarks = useProvider(bookmarkEventProvider).data?.value;
 
@@ -40,8 +44,26 @@ class BoardPage extends HookWidget{
         appBar: AppBar(
           toolbarHeight: 50,
           bottom: TabBar(
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BubbleTabIndicator(
+              indicatorHeight: 30,
+              tabBarIndicatorSize: TabBarIndicatorSize.tab,
+              indicatorColor: Colors.orange[50],
+            ),
             controller: tab,
             isScrollable: true,
+            labelColor: Colors.deepOrange[800],
+            labelStyle: const TextStyle(
+              textBaseline: TextBaseline.ideographic,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 4,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              textBaseline: TextBaseline.alphabetic,
+              fontWeight: FontWeight.normal,
+              letterSpacing: 0,
+            ),
+            unselectedLabelColor: Colors.white,
             tabs: const [
               Tab(text: 'イベント'),
               Tab(text: 'タイムライン'),
@@ -68,9 +90,8 @@ class BoardPage extends HookWidget{
           children: [
             Center(
               child: RefreshIndicator(
-                onRefresh: () async => print('refresh'), // TODO: レフレッシュを実装するためにはFutureProviderの仕組みを変えないといけないかも
-                child: schedules.when(
-                  data: (schedules) => schedules.isEmpty
+                onRefresh: () async => scheduleRepo.fetch(),
+                child: schedules.isEmpty
                     ? const Center(child: Text('該当するイベントはありませんでした'))
                     : ListView.builder(
                         itemBuilder: (context, index) =>
@@ -84,12 +105,6 @@ class BoardPage extends HookWidget{
                           ),
                         itemCount: schedules.length,
                       ),
-                  loading: () => const Center(child: Text('loading')),
-                  error: (dynamic err, st){
-                    print(err);
-                    return Center(child: Text(err.toString()));
-                  },
-                ),
               )
             ),
             Center(

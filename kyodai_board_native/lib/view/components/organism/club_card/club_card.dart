@@ -12,8 +12,12 @@ class ClubCard extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 4),
       clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+      ),
       child: InkWell(
         onTap: onTap,
         child: Column(
@@ -26,21 +30,54 @@ class ClubCard extends StatelessWidget{
                   child: SizedBox(
                     width: 80,
                     height: 80,
-                    child: AsyncImage(
-                      imageUrl: club.profile.imageUrl,
-                      fit: BoxFit.cover,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: AsyncImage(
+                        imageUrl: club.profile.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
                 Flexible(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(club.profile.name),
-                        Text(club.profile.genre.join(' ')),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                club.profile.name,
+                                maxLines: 1,
+                                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: isBookmarked == null ? null : bookmark,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 3),
+                                child: Icon(
+                                  isBookmarked ?? false ? Icons.bookmark : Icons.bookmark_border,
+                                  color: isBookmarked ?? false ? Colors.cyan[600] : Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          club.profile.genre.join('  '),
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.caption,
+                        ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
@@ -57,48 +94,33 @@ class ClubCard extends StatelessWidget{
                             )
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         Text(
                           club.profile.description,
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.bodyText1.copyWith(
+                            fontSize: 13,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ]
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '',
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.share),
-                        onPressed: () => print('share'),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          isBookmarked ?? false ? Icons.bookmark : Icons.bookmark_border,
-                          color: isBookmarked ?? false ? Colors.cyan[600] : Colors.black,
-                        ),
-                        onPressed: isBookmarked == null ? null : bookmark,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            // const SizedBox(height: 8),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 8),
+            //   child: Text(
+            //     club.profile.description,
+            //     maxLines: 1,
+            //     style: Theme.of(context).textTheme.bodyText1.copyWith(
+            //       fontSize: 13,
+            //     ),
+            //     overflow: TextOverflow.ellipsis,
+            //   ),
+            // ),
           ],
         ),
       ),

@@ -4,11 +4,15 @@ class TextWithIcon extends StatelessWidget{
   const TextWithIcon(this.text, {
     @required this.leadingIcon,
     this.style,
+    this.spacing = 2,
+    this.iconColor,
   });
 
   final String text;
   final IconData leadingIcon;
   final TextStyle style;
+  final double spacing;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +22,11 @@ class TextWithIcon extends StatelessWidget{
         children: [
           WidgetSpan(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
+              padding: EdgeInsets.only(right: spacing),
               child: Icon(
                 leadingIcon,
                 size: style.fontSize,
-                color: style.color,
+                color: iconColor ?? style.color,
               ),
             ),
           ),

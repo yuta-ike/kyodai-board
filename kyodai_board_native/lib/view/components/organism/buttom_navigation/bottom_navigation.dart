@@ -26,12 +26,12 @@ class BottomNavigation extends HookWidget {
     return Hero(
       tag: 'hero',
       child: BottomNavigationBar(
+        elevation: 4,
         items: items,
         currentIndex: pageIndex.state,
-        fixedColor: Colors.blueAccent,
         onTap: (index){
           pageIndex.state = index;
-          Navigator.pushReplacementNamed(context, routes[items[index]]);
+          Navigator.of(context).pushNamedAndRemoveUntil(routes[items[index]], (_) => false);
         },
         type: BottomNavigationBarType.fixed,
       ),

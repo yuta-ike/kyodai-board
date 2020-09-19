@@ -7,27 +7,35 @@ import 'package:kyodai_board/view/components/organism/buttom_navigation/bottom_n
 class SettingPage extends HookWidget{
   Future<void> _signOut(NavigatorState navigator) async {
     await signOut();
-    await navigator.pushNamedAndRemoveUntil(Routes.login, (routes) => routes.settings.name == Routes.login);
+    await navigator.pushNamedAndRemoveUntil(Routes.top, (routes) => routes.settings.name == Routes.top);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('設定'),
-        toolbarHeight: 40,
+        title: Text(
+          '設定',
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
+        toolbarHeight: 50,
       ),
       bottomNavigationBar: BottomNavigation(),
       body: ListView(
         children: [
-          const ListTile(
-            title: Text('アカウント情報設定'),
-            trailing: Icon(Icons.chevron_right),
+          ListTile(
+            title: const Text('アカウント情報設定'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).pushNamed(Routes.settingsAccount),
           ),
           const Divider(height: 0),
-          const ListTile(
-            title: Text('通知設定'),
-            trailing: Icon(Icons.chevron_right),
+          ListTile(
+            title: const Text('通知設定'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).pushNamed(Routes.settingsNotify),
           ),
           const Divider(height: 0),
           const ListTile(
@@ -55,9 +63,10 @@ class SettingPage extends HookWidget{
             trailing: Icon(Icons.chevron_right),
           ),
           const Divider(height: 0),
-          const ListTile(
-            title: Text('バージョン情報'),
-            trailing: Icon(Icons.chevron_right),
+          ListTile(
+            title: const Text('バージョン情報'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).pushNamed(Routes.version),
           ),
           const Divider(height: 0),
           FlatButton(

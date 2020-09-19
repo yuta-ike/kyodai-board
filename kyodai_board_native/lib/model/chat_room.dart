@@ -3,7 +3,7 @@ import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/utils/dynamic_cast_map.dart';
 
 class ChatRoom{
-  const ChatRoom({
+  ChatRoom({
     this.id,
     this.lastMessageId,
     this.lastClubReadId,
@@ -29,7 +29,7 @@ class ChatRoom{
   final String studentId;
   final String clubId;
   final DateTime updatedAt;
-  final Club club;
+  Club club;
 
   bool get hasUnreadForStudent => lastMessageId != lastStudentReadId;
 }

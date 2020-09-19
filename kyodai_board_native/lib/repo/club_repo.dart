@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/model/enums/campus.dart';
@@ -129,7 +131,16 @@ final clubProvider = StateNotifierProvider.autoDispose.family(
 
 
 // GET: Clubを取得
+// hooks
+AsyncSnapshot<Club> useClub(String clubId){
+  final future = useState(getClub(clubId));
+  return useFuture<Club>(future.value);
+}
+// async function
 Future<Club> getClub(String clubId) async {
+  if(clubId == null){
+    return null;
+  }
   final snapshot = await fsinstance.collection('clubs').doc(clubId).get();
   return Club.fromMap(snapshot.id, snapshot.data());
 }

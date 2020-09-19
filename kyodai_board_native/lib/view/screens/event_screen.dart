@@ -195,14 +195,20 @@ class EventScreen extends HookWidget{
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 event?.title ?? schedule?.title ?? '',
-                                style: Theme.of(context).textTheme.headline1,
+                                style: Theme.of(context).textTheme.headline1.copyWith(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               Text(
                                 event?.hostName ?? schedule?.hostName ?? '',
-                                style: Theme.of(context).textTheme.headline2,
+                                style: Theme.of(context).textTheme.headline2.copyWith(
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -315,9 +321,25 @@ class EventScreen extends HookWidget{
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'イベント日程',
-                      style: Theme.of(context).textTheme.subtitle1,
+                    Text.rich(
+                      TextSpan(
+                        text: 'イベント日程  全 ',
+                        style: Theme.of(context).textTheme.subtitle1.copyWith(
+                          fontSize: 13,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '${event?.schedules?.length ?? ' '}',
+                            style: Theme.of(context).textTheme.subtitle1.copyWith(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: ' 件',
+                          ),
+                        ],
+                      )
                     ),
 
                     if(event?.applyTypes?.needApply ?? false)
@@ -410,16 +432,18 @@ class EventScreen extends HookWidget{
                     children: [
                       Text(
                         '情報',
-                        style: Theme.of(context).textTheme.subtitle1,
+                        style: Theme.of(context).textTheme.subtitle1.copyWith(
+                          fontSize: 16,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '＊参加回によって異なる場合があります。詳しくは「イベント一覧」の詳細からご確認ください。',
+                        '＊参加回によって異なる場合があります。詳しくは上記「イベント日程」からご確認ください。',
                         style: Theme.of(context).textTheme.caption.copyWith(
                           color: Theme.of(context).errorColor,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       DefaultTextStyle(
                         style: Theme.of(context).textTheme.bodyText1.copyWith(
                           fontSize: 14,

@@ -1,14 +1,16 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/model/chat_room.dart';
+import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/repo/chat_repo.dart';
 import 'package:kyodai_board/repo/club_repo.dart';
 // import 'package:image_picker/image_picker.dart';
+import 'package:kyodai_board/router/router.dart';
+import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/mixins/club_report_dialog.dart';
 import 'package:kyodai_board/view/mixins/show_snackbar.dart';
 
@@ -16,50 +18,63 @@ enum MenuItems {
   report
 }
 
-class ChatScreen extends HookWidget{
+class ChatTemporaryScreen extends HookWidget{
   // ignore: always_require_non_null_named_parameters
-  ChatScreen(this.chatroom);
+  ChatTemporaryScreen(this.clubId);
 
   final GlobalKey<DashChatState> _chatViewKey = GlobalKey<DashChatState>();
-  final ChatRoom chatroom;
+  final String clubId;
 
-  void _send(BuildContext context, ChatMessage message){
-    sendMessage(chatroom.id, message);
-    print(message.toJson());
+
+  Future<void> _send(BuildContext context, ChatMessage message, [List<ChatMessage> initialMessages]) async {
+    final chatroom = await createChatroom(clubId, initialMessages: [...initialMessages, message]);
+    await Navigator.pushReplacementNamed(context, Routes.chatDetail, arguments: RouterProp(chatroom, implicit: true));
   }
 
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    // final chatroom = useChatroom(chatroom.o);
-    final club = chatroom.club;
-    final messages = useProvider(chatProvider(chatroom.id));
     final user = useState(getChatUser()).value;
+    final chatroom = useChatroomWithId(clubId);
+    final club = useClub(clubId);
+    final readyForShowMessage = useState(false);
 
-    // clubがなければclubを取得
+    if(chatroom.data != null){
+      chatroom.data.club = club.data;
+    }
+
     useEffect((){
-      if(chatroom.club == null){
-        getClub(chatroom.clubId).then((value){
-          chatroom.club = value;
-        });
+      if(chatroom.connectionState == ConnectionState.done){
+        if(chatroom.data == null){
+          readyForShowMessage.value = true;
+          return;
+        }
+        
+        if(club.connectionState == ConnectionState.done){
+          SchedulerBinding.instance.addPostFrameCallback((_){
+            Navigator.of(context).pushReplacementNamed(Routes.chatDetail, arguments: RouterProp(chatroom.data, implicit: true));
+          });
+        }
       }
-    }, []);
+      return null;
+    }, [chatroom.connectionState, club.connectionState]);
+
     
+    final initialMessages = useState(<ChatMessage>[]);
+
+    useEffect((){
+      if(club.data != null){
+        initialMessages.value = _getinitialMessages(club.data);
+      }
+      return null;
+    }, [club.connectionState]);
+
     return Scaffold(
       key: _key,
-      // FIXME: 戻るボタンを押した時にエラーが発生する（メモリリーク）
       appBar: AppBar(
         toolbarHeight: 50,
-        title: Text(club?.profile?.name ?? ''),
-        leading: Builder(
-          builder: (BuildContext context) => IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
+        title: Text(readyForShowMessage.value ? (club.data?.profile?.name ?? '') : ''),
         actions: [
           if(club != null)
             PopupMenuButton<MenuItems>(
@@ -68,7 +83,7 @@ class ChatScreen extends HookWidget{
               offset: const Offset(0, 100),
               onSelected: (MenuItems item) async {
                 if(item == MenuItems.report){
-                  final result = await ReportDialog.showClubReport(context, club);
+                  final result = await ReportDialog.showClubReport(context, club.data);
                   if(result ?? false){
                     ShowSnackBar.show(_key.currentState, '通報を完了しました');
                   }
@@ -84,19 +99,21 @@ class ChatScreen extends HookWidget{
         ],
       ),
       body: SafeArea(
-        child: messages.when(
-          loading: () => const Center(child: Text('loading')),
-          error: (_, __) => const Center(child: Text('error')),
-          data: (messages){
-            return DashChat(
+        child: chatroom.connectionState != ConnectionState.done
+          ? const Center(child: Text('loading'))
+          : DashChat(
               key: _chatViewKey,
-              onSend: (message) => _send(context, message),
+              onSend: (message) => _send(context, message, initialMessages.value),
+              sendOnEnter: true,
               textInputAction: TextInputAction.send,
               user: user,
-              inputDecoration: const InputDecoration.collapsed(hintText: 'メッセージ'),
+              inputDecoration: const InputDecoration.collapsed(
+                hintText: 'メッセージ',
+              ),
+              inputDisabled: chatroom.connectionState != ConnectionState.done || club.connectionState != ConnectionState.done,
               dateFormat: DateFormat('yyyy年MM月dd日'),
               timeFormat: DateFormat('HH:mm'),
-              messages: messages,
+              messages: readyForShowMessage.value ? initialMessages.value : [],
               scrollToBottom: true,
               onPressAvatar: (ChatUser user) {
                 print('OnPressAvatar: ${user.name}');
@@ -109,36 +126,7 @@ class ChatScreen extends HookWidget{
                 border: Border.all(width: 0),
                 color: Colors.white,
               ),
-              onQuickReply: (Reply reply) {
-                messages.add(
-                  ChatMessage(
-                    text: reply.value,
-                    createdAt: DateTime.now(),
-                    user: user
-                  )
-                );
-                Timer(const Duration(milliseconds: 300), () {
-                  _chatViewKey.currentState.scrollController
-                    .animateTo(
-                      _chatViewKey.currentState.scrollController.position
-                          .maxScrollExtent,
-                      curve: Curves.easeOut,
-                      duration: const Duration(milliseconds: 300),
-                    );
-
-                  // if (i == 0) {
-                  //   systemMessage();
-                  //   Timer(Duration(milliseconds: 600), () {
-                  //     systemMessage();
-                  //   });
-                  // } else {
-                  //   systemMessage();
-                  // }
-                });
-              },
-              onLoadEarlier: () {
-                print('laoding...');
-              },
+              onLoadEarlier: () {},
               showTraillingBeforeSend: true,
               trailing: <Widget>[
                 IconButton(
@@ -185,10 +173,28 @@ class ChatScreen extends HookWidget{
                   },
                 )
               ],
-            );
-          }
-        ),
+            )
       ),
     );
   }
+
+  List<ChatMessage> _getinitialMessages(Club club) => [
+      ChatMessage(
+        customProperties: <String, dynamic>{ 'isMeta': true },
+        user: ChatUser(
+          name: 'スタッフ',
+          // ADD avater url
+        ),
+        text: 'チャットルームへようこそ。\n\nこのチャットルームでは、あなたの情報が団体に知られることはありません。完全に匿名でやりとりが可能です。\n\nまた、既読通知も伝わりません。'
+      ),
+      if(club?.initialMessage != null && club.initialMessage.isNotEmpty)
+        ChatMessage(
+          user: ChatUser(
+            uid: club.id,
+            name: club.profile.name,
+            avatar: club.profile.iconImageUrl,
+          ),
+          text: club.initialMessage,
+        )
+    ];
 }
