@@ -36,7 +36,6 @@ class EventScreen extends HookWidget{
           height: MediaQuery.of(context).size.height * 0.8,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: ListView(
-            // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 8),
               if(schedule.applyTypes.needApply) ...[
@@ -158,377 +157,358 @@ class EventScreen extends HookWidget{
         ],
       ),
       body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                constraints: BoxConstraints.expand(height: MediaQuery.of(context).size.height * 0.3),
-                color: Colors.grey,
-                child: event == null && schedule == null ? null : AsyncImage(
-                  imageUrl: event?.imageUrl ?? schedule?.imageUrl,
-                  fit: BoxFit.cover,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              constraints: BoxConstraints.expand(height: MediaQuery.of(context).size.height * 0.3),
+              color: Colors.grey,
+              child: event == null && schedule == null ? null : AsyncImage(
+                imageUrl: event?.imageUrl ?? schedule?.imageUrl,
+                fit: BoxFit.cover,
               ),
-              
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    InkWell(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ClubScreen(clubId: event.clubId)
-                        )
-                      ),
-                      child: AsyncImage(
-                        imageUrl: iconUrl.value,
-                        imageBuilder: (_, image) => CircleAvatar(
-                          radius: 32,
-                          backgroundImage: image,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                event?.title ?? schedule?.title ?? '',
-                                style: Theme.of(context).textTheme.headline1.copyWith(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                event?.hostName ?? schedule?.hostName ?? '',
-                                style: Theme.of(context).textTheme.headline2.copyWith(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.cyan,
-                                  border:Border.all(
-                                    width: 1,
-                                    color: Colors.cyan,
-                                  ),
-                                ),
-                                child: Text(
-                                  '初心者歓迎',
-                                  style: Theme.of(context).textTheme.caption.copyWith(
-                                    // backgroundColor: Colors.cyan[400],
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 6),
-                                padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border:Border.all(
-                                    width: 1,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                child: Text(
-                                  '要予約',
-                                  style: Theme.of(context).textTheme.caption.copyWith(
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ]
-                      ),
-                    ),
-                  ]
-                )
-              ),
-
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  event?.description ?? schedule?.description ?? '',
-                  style: Theme.of(context).textTheme.bodyText2.copyWith(
-                    fontSize: 13
-                  ),
-                ),
-              ),
-
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.share),
-                      onPressed: () => print('share'),
-                    ),
-                    if(event != null)
-                      bookmarks.when(
-                        data: (data) => IconButton(
-                          icon: Icon(
-                            data.containsClubAndEventId(event.id, event.clubId) ? Icons.bookmark : Icons.bookmark_border,
-                            color: data.containsClubAndEventId(event.id, event.clubId) ? Colors.cyan[600] : Colors.black,
-                          ),
-                          onPressed: () {
-                            print(bookmarks.data.value.containsClubAndEventId(event.id, event.clubId));
-                            return bookmarks.data.value.containsClubAndEventId(event.id, event.clubId)
-                              ? unbookmarkEvent(bookmarks.data.value.getWithEventId(event.id))
-                              : bookmarkEvent(event.id, event.clubId);
-                          },
-                        ),
-                        loading: () => const IconButton(
-                            icon: Icon(
-                              Icons.bookmark_border,
-                              color: Colors.transparent,
-                            ),
-                            onPressed: null,
-                          ),
-                        error: (dynamic _, __) => const IconButton(
-                          icon: Icon(
-                            Icons.bookmark_border,
-                            color: Colors.red,
-                          ),
-                          onPressed: null,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-
-              Divider(
-                thickness: 16,
-                height: 16,
-                color: Colors.grey[200],
-              ),
-
-              Container(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        text: 'イベント日程  全 ',
-                        style: Theme.of(context).textTheme.subtitle1.copyWith(
-                          fontSize: 13,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: '${event?.schedules?.length ?? ' '}',
-                            style: Theme.of(context).textTheme.subtitle1.copyWith(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const TextSpan(
-                            text: ' 件',
-                          ),
-                        ],
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ClubScreen(clubId: event.clubId)
                       )
                     ),
-
-                    if(event?.applyTypes?.needApply ?? false)
-                      const SizedBox(height: 8),
-                      
-                    if((event?.applyTypes?.needApply ?? false) && (event.schedules?.isNotEmpty ?? false))
-                      Center(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 1,
-                              color: Colors.red,
-                            )
-                          ),
-                          child: Text(
-                            'このイベントは事前申し込みが必要な回があります',
-                            style: Theme.of(context).textTheme.bodyText1.copyWith(
-                              color: Colors.red
-                            ),
-                          )
-                        ),
-                      ),
-
-                    const SizedBox(height: 16),
-                    
-                    if(event == null)
-                      const SizedBox(height: 300, child: Text('loading')),
-                    
-                    if(event != null)
-                      Container(
-                        constraints: showAllSchedule.value ? const BoxConstraints(maxHeight: 300) : null,
-                        child: event.schedules?.isEmpty ?? false
-                          ? Center(
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    width: 1,
-                                    color: Colors.red,
-                                  )
-                                ),
-                                child: Text(
-                                  '現在登録されているイベント日程はありません',
-                                  style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                    color: Colors.red
-                                  ),
-                                )
-                              ),
-                          )
-                          : ListView.separated(
-                            physics: showAllSchedule.value ? null : const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.only(top: 0),
-                            itemCount: event.schedules?.length ?? 0,
-                            separatorBuilder: (context, index) => const Divider(thickness: 0, height: 0,),
-                            itemBuilder: (context, index){
-                              return ScheduleListItem(event.schedules[index], () => _apply(context, event.schedules[index]));
-                            }
-                          ),
-                      ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    if(event?.schedules?.isNotEmpty ?? false)
-                    Center(
-                      child: FlatButton(
-                        onPressed: () => showAllSchedule.value = !showAllSchedule.value,
-                        child: Text(showAllSchedule.value ? '全ての日程を見る' : '日程を折りたたむ'),
+                    child: AsyncImage(
+                      imageUrl: iconUrl.value,
+                      imageBuilder: (_, image) => CircleAvatar(
+                        radius: 32,
+                        backgroundImage: image,
                       ),
                     ),
-                  ]
-                )
-              ),
-
-              Divider(
-                thickness: 16,
-                height: 32,
-                color: Colors.grey[200],
-              ),
-
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: event == null
-                  ? const SizedBox(height: 300, child: Text('loading'))
-                  : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '情報',
-                        style: Theme.of(context).textTheme.subtitle1.copyWith(
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '＊参加回によって異なる場合があります。詳しくは上記「イベント日程」からご確認ください。',
-                        style: Theme.of(context).textTheme.caption.copyWith(
-                          color: Theme.of(context).errorColor,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      DefaultTextStyle(
-                        style: Theme.of(context).textTheme.bodyText1.copyWith(
-                          fontSize: 14,
-                        ),
-                        child: Column(
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            _buildInfo(context, '持ち物', event.belongings),
-                            const Divider(),
-                            _buildInfo(context, '集合場所', event.place_display),
-                            const Divider(),
-                            _buildInfo(context, '実施場所', event.meetingPlace_display),
-                            const Divider(),
-                            _buildInfo(context, '雨天時', event.weatherCancel_display),
-                            const Divider(),
-                            _buildInfo(context, '注意事項', event.notes),
-                            const Divider(),
-                            _buildInfo(context, '連絡先', event.contact),
-                            const Divider(),
-                            _buildInfo(context, '当日連絡先', event.contactCurrentDay),
+                            Text(
+                              event?.title ?? schedule?.title ?? '',
+                              maxLines: 1,
+                              style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            bookmarks.when(
+                              loading: () => const InkWell(child: Icon(Icons.bookmark)),
+                              error: (dynamic _, __) => const InkWell(child: Icon(Icons.bookmark)),
+                              data: (bookmarks) {
+                                final isBookmarked = event != null && bookmarks.containsClubAndEventId(event.id, event.clubId);
+                                return InkWell(
+                                  onTap: () => event == null ? null : isBookmarked
+                                      ? unbookmarkEvent(bookmarks.getWithEventId(event.id))
+                                      : bookmarkEvent(event.id, event.clubId),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 3),
+                                    child: Icon(
+                                      isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                                      color: isBookmarked ?? false ? Colors.cyan[600] : Colors.black,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
-                      ),
-                    ],
+                        Text(
+                          event?.hostName ?? schedule?.hostName ?? '',
+                          style: Theme.of(context).textTheme.headline2.copyWith(
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.cyan,
+                                border:Border.all(
+                                  width: 1,
+                                  color: Colors.cyan,
+                                ),
+                              ),
+                              child: Text(
+                                '初心者歓迎',
+                                style: Theme.of(context).textTheme.caption.copyWith(
+                                  // backgroundColor: Colors.cyan[400],
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 6),
+                              padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border:Border.all(
+                                  width: 1,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              child: Text(
+                                '要予約',
+                                style: Theme.of(context).textTheme.caption.copyWith(
+                                  color: Colors.red,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ]
+                    ),
                   ),
+                ]
+              )
+            ),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                event?.description ?? schedule?.description ?? '',
+                style: Theme.of(context).textTheme.bodyText2.copyWith(
+                  fontSize: 13
                 ),
-
-              Divider(
-                thickness: 16,
-                height: 32,
-                color: Colors.grey[200],
               ),
+            ),
 
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
+            const SizedBox(height: 16),
+
+            Divider(
+              thickness: 16,
+              height: 16,
+              color: Colors.grey[200],
+            ),
+
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      text: 'イベント日程  全 ',
+                      style: Theme.of(context).textTheme.subtitle1.copyWith(
+                        fontSize: 13,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: '${event?.schedules?.length ?? ' '}',
+                          style: Theme.of(context).textTheme.subtitle1.copyWith(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const TextSpan(
+                          text: ' 件',
+                        ),
+                      ],
+                    )
+                  ),
+
+                  if(event?.applyTypes?.needApply ?? false)
+                    const SizedBox(height: 8),
+                    
+                  if((event?.applyTypes?.needApply ?? false) && (event.schedules?.isNotEmpty ?? false))
+                    Center(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 1,
+                            color: Colors.red,
+                          )
+                        ),
+                        child: Text(
+                          'このイベントは事前申し込みが必要な回があります',
+                          style: Theme.of(context).textTheme.bodyText1.copyWith(
+                            color: Colors.red
+                          ),
+                        )
+                      ),
+                    ),
+
+                  const SizedBox(height: 16),
+                  
+                  if(event == null)
+                    const SizedBox(height: 300, child: Text('loading')),
+                  
+                  if(event != null)
+                    Container(
+                      constraints: showAllSchedule.value ? const BoxConstraints(maxHeight: 300) : null,
+                      child: event.schedules?.isEmpty ?? false
+                        ? Center(
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  width: 1,
+                                  color: Colors.red,
+                                )
+                              ),
+                              child: Text(
+                                '現在登録されているイベント日程はありません',
+                                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                  color: Colors.red
+                                ),
+                              )
+                            ),
+                        )
+                        : ListView.separated(
+                          physics: showAllSchedule.value ? null : const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.only(top: 0),
+                          itemCount: event.schedules?.length ?? 0,
+                          separatorBuilder: (context, index) => const Divider(thickness: 0, height: 0,),
+                          itemBuilder: (context, index){
+                            return ScheduleListItem(event.schedules[index], () => _apply(context, event.schedules[index]));
+                          }
+                        ),
+                    ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  if(event?.schedules?.isNotEmpty ?? false)
+                  Center(
+                    child: FlatButton(
+                      onPressed: () => showAllSchedule.value = !showAllSchedule.value,
+                      child: Text(showAllSchedule.value ? '全ての日程を見る' : '日程を折りたたむ'),
+                    ),
+                  ),
+                ]
+              )
+            ),
+
+            Divider(
+              thickness: 16,
+              height: 32,
+              color: Colors.grey[200],
+            ),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: event == null
+                ? const SizedBox(height: 300, child: Text('loading'))
+                : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'SNS',
-                      style: Theme.of(context).textTheme.subtitle1,
+                      '情報',
+                      style: Theme.of(context).textTheme.subtitle1.copyWith(
+                        fontSize: 16,
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: 300,
-                      child: SingleChildScrollView(
-                        child: SocialEmbed(
-                          embedCode: tweetContent,
-                          type: SocailMediaPlatforms.twitter,
-                        ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '＊参加回によって異なる場合があります。詳しくは上記「イベント日程」からご確認ください。',
+                      style: Theme.of(context).textTheme.caption.copyWith(
+                        color: Theme.of(context).errorColor,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    DefaultTextStyle(
+                      style: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontSize: 14,
+                      ),
+                      child: Column(
+                        children: [
+                          _buildInfo(context, '持ち物', event.belongings),
+                          const Divider(),
+                          _buildInfo(context, '集合場所', event.place_display),
+                          const Divider(),
+                          _buildInfo(context, '実施場所', event.meetingPlace_display),
+                          const Divider(),
+                          _buildInfo(context, '雨天時', event.weatherCancel_display),
+                          const Divider(),
+                          _buildInfo(context, '注意事項', event.notes),
+                          const Divider(),
+                          _buildInfo(context, '連絡先', event.contact),
+                          const Divider(),
+                          _buildInfo(context, '当日連絡先', event.contactCurrentDay),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              
-              Divider(
-                thickness: 16,
-                height: 32,
-                color: Colors.grey[200],
-              ),
 
-              SafeArea(
-                top: false, left: false, right: false,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('実際にチャットする'),
-                      RaisedButton(
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                        onPressed: () => print('go to chatroom'),
-                        child: const Center(
-                          child: Text('チャット画面へ')
-                        ),
-                      ),
-                    ],
+            Divider(
+              thickness: 16,
+              height: 32,
+              color: Colors.grey[200],
+            ),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SNS',
+                    style: Theme.of(context).textTheme.subtitle1,
                   ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: 300,
+                    child: SingleChildScrollView(
+                      child: SocialEmbed(
+                        embedCode: tweetContent,
+                        type: SocailMediaPlatforms.twitter,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            Divider(
+              thickness: 16,
+              height: 32,
+              color: Colors.grey[200],
+            ),
+
+            SafeArea(
+              top: false, left: false, right: false,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('実際にチャットする'),
+                    RaisedButton(
+                      color: Theme.of(context).primaryColor,
+                      textColor: Colors.white,
+                      onPressed: () => print('go to chatroom'),
+                      child: const Center(
+                        child: Text('チャット画面へ')
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
     );
   }
 

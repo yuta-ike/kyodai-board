@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:kyodai_board/firebase/firebase_auth.dart';
 import 'package:kyodai_board/interactor/auth_interactor.dart';
-import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/organism/buttom_navigation/bottom_navigation.dart';
-import 'package:kyodai_board/view/screens/account_setting_screens/email_edit_screen.dart';
 
 class AuthRequireScreen extends HookWidget{
   @override
   Widget build(BuildContext context) {
-    final isEmailRegistered = auth.currentUser.email != null;
-
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
@@ -39,7 +34,7 @@ class AuthRequireScreen extends HookWidget{
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('AppleまたはGoogleアカウントとの連携'),
+                    const Text('Appleアカウントとの連携'),
                     const SizedBox(height: 16),
                     Align(
                       alignment: Alignment.center,
@@ -48,17 +43,6 @@ class AuthRequireScreen extends HookWidget{
                         text: 'Appleでログイン',
                         elevation: 0,
                         onPressed: () {
-                        },
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: SignInButton(
-                        Buttons.GoogleDark,
-                        text: 'Googleでログイン',
-                        elevation: 0,
-                        onPressed: () {
-                          signInGoogle();
                         },
                       ),
                     ),
@@ -96,37 +80,19 @@ class AuthRequireScreen extends HookWidget{
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('メールアドレスの認証'),
+                    const Text('Googleアカウントとの連携'),
                     const SizedBox(height: 16),
-                    isEmailRegistered ? (
-                      Align(
-                        alignment: Alignment.center,
-                        child: SignInButton(
-                          Buttons.Email,
-                          text: 'メールを認証する',
-                          elevation: 0,
-                          onPressed: () {
-                            sendCode();
-                          },
-                        ),
-                      )
-                    ) : (
-                      Align(
-                        alignment: Alignment.center,
-                        child: SignInButton(
-                          Buttons.Email,
-                          text: 'メールアドレスを登録',
-                          elevation: 0,
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => EmailEditScreen(auth.currentUser.email),
-                              )
-                            );
-                          },
-                        ),
-                      )
-                    )
+                    Align(
+                      alignment: Alignment.center,
+                      child: SignInButton(
+                        Buttons.GoogleDark,
+                        text: 'Googleでログイン',
+                        elevation: 0,
+                        onPressed: () {
+                          signInGoogle();
+                        },
+                      ),
+                    ),
                   ],
                 ),
               )

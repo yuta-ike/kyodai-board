@@ -7,13 +7,12 @@ import 'package:kyodai_board/model/event_bookmark.dart';
 import 'package:kyodai_board/repo/board_repo.dart';
 import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/router/routes.dart';
-import 'package:kyodai_board/view/components/organism/board_card/impl/board_card.dart';
 import 'package:kyodai_board/view/components/organism/buttom_navigation/bottom_navigation.dart';
 import 'package:kyodai_board/view/components/organism/schedule_card/schedule_card.dart';
 import 'package:kyodai_board/view/screens/event_screen.dart';
 
-enum Tabs{ event, board }
-enum TabState{ event, board, transition }
+enum Tabs{ event, eventBookmark, /*board*/ }
+enum TabState{ event, eventBookmark, /*board,*/ transition }
 
 // FIXME: タブを移動すると検索情報が失われる
 
@@ -25,18 +24,19 @@ class BoardPage extends HookWidget{
     final tabState = useState(TabState.event);
     final tab = useTabController(initialLength: 2);
     tab.addListener((){
-      tabState.value = tab.indexIsChanging ? TabState.transition : tab.index == 0 ? TabState.event : TabState.board;
+      tabState.value = tab.indexIsChanging ? TabState.transition : tab.index == 0 ? TabState.event : TabState.eventBookmark;
     });
 
     final scheduleRepo = useProvider(scheduleProvider);
     final schedules = scheduleRepo.state;
-    final boards = useProvider(boardProvider);
 
     useEffect((){
       scheduleRepo.fetch();
     }, []);
 
     final bookmarks = useProvider(bookmarkEventProvider).data?.value;
+
+    final bookmarkedSchedules = schedules.where((schedule) => bookmarks.containsClubAndEventId(schedule.eventRef.id, schedule.clubId)).toList();
 
     return DefaultTabController(
       length: 2,
@@ -65,8 +65,9 @@ class BoardPage extends HookWidget{
             ),
             unselectedLabelColor: Colors.white,
             tabs: const [
-              Tab(text: 'イベント'),
-              Tab(text: 'タイムライン'),
+              Tab(text: '一覧'),
+              Tab(text: 'ブックマーク'),
+              // Tab(text: 'タイムライン'),
             ],
           ),
         ),
@@ -74,9 +75,7 @@ class BoardPage extends HookWidget{
           ? null :
           FloatingActionButton.extended(
             icon: const Icon(Icons.search),
-            label: tabState.value == TabState.event
-                      ? const Text('イベント')
-                      : const Text('タイムライン'),
+            label: tabState.value == TabState.event ? const Text('イベント') : const Text('タイムライン'),
             onPressed: () async {
               final query = await Navigator.of(context).pushNamed(Routes.boardsSearch, arguments: EventQuery());
               if(query != null){
@@ -94,35 +93,36 @@ class BoardPage extends HookWidget{
                 child: schedules.isEmpty
                     ? const Center(child: Text('該当するイベントはありませんでした'))
                     : ListView.builder(
+                        itemCount: schedules.length,
                         itemBuilder: (context, index) =>
                           ScheduleCard(
                             schedule: schedules[index],
                             onTap: () => Navigator.of(context).push(MaterialPageRoute<EventScreen>(builder: (_) => EventScreen(schedule: schedules[index]))),
-                            isBookmarked: bookmarks.containsClubAndEventId(/*schedules[index].eventId*/'1', schedules[index].clubId),
-                            bookmark: () => bookmarks.containsClubAndEventId(/*schedules[index].eventId*/'1', schedules[index].clubId)
-                                ? unbookmarkEvent(bookmarks.getWithEventId(/*schedules[index].eventId)*/'1'))
-                                : bookmarkEvent(/*schedules[index].eventId*/ '1', schedules[index].clubId),
+                            isBookmarked: bookmarks.containsClubAndEventId(schedules[index].eventRef.id, schedules[index].clubId),
+                            bookmark: () => bookmarks.containsClubAndEventId(schedules[index].eventRef.id, schedules[index].clubId)
+                                ? unbookmarkEvent(bookmarks.getWithEventId(schedules[index].eventRef.id))
+                                : bookmarkEvent(schedules[index].eventRef.id, schedules[index].clubId),
                           ),
-                        itemCount: schedules.length,
                       ),
               )
             ),
             Center(
-              child: boards.when(
-                data: (boards) => boards.isEmpty
-                  ? const Center(child: Text('該当する投稿はありませんでした'))
-                  : ListView.builder(
-                      itemBuilder: (context, index) =>
-                        BoardCard(
-                          boards[index],
-                          onTap: () => print(boards[index].title),
-                        ),
-                      itemCount: boards.length,
-                    ),
-                loading: () => const Center(child: Text('loading')),
-                error: (dynamic err, st){
-                  return Center(child: Text(err.toString()));
-                },
+              child: RefreshIndicator(
+                onRefresh: () async => scheduleRepo.fetch(),
+                child: bookmarkedSchedules.isEmpty
+                    ? const Center(child: Text('該当するイベントはありませんでした'))
+                    : ListView.builder(
+                        itemCount: bookmarkedSchedules.length,
+                        itemBuilder: (context, index) =>
+                          ScheduleCard(
+                            schedule: bookmarkedSchedules.toList()[index],
+                            onTap: () => Navigator.of(context).push(MaterialPageRoute<EventScreen>(builder: (_) => EventScreen(schedule: schedules[index]))),
+                            isBookmarked: bookmarks.containsClubAndEventId(bookmarkedSchedules[index].eventRef.id, bookmarkedSchedules[index].clubId),
+                            bookmark: () => bookmarks.containsClubAndEventId(bookmarkedSchedules[index].eventRef.id, bookmarkedSchedules[index].clubId)
+                                ? unbookmarkEvent(bookmarks.getWithEventId(bookmarkedSchedules[index].eventRef.id))
+                                : bookmarkEvent(bookmarkedSchedules[index].eventRef.id, bookmarkedSchedules[index].clubId),
+                          ),
+                      ),
               )
             ),
           ]
