@@ -70,7 +70,7 @@ class BoardPage extends HookWidget{
             ],
           ),
         ),
-        floatingActionButton: tabState.value == TabState.transition
+        floatingActionButton: tabState.value != TabState.event
           ? null :
           FloatingActionButton.extended(
             icon: const Icon(Icons.search),

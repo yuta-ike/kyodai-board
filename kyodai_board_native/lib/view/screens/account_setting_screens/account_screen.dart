@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kyodai_board/firebase/firebase_auth.dart';
+import 'package:kyodai_board/interactor/auth_interactor.dart';
+import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/atom/text_with_icon.dart';
 import 'package:kyodai_board/view/screens/account_setting_screens/account_edit_screen.dart';
-import 'package:kyodai_board/view/screens/account_setting_screens/account_provider_screen.dart';
 import 'package:kyodai_board/view/screens/account_setting_screens/email_edit_screen.dart';
 import 'package:kyodai_board/view/screens/account_setting_screens/email_verify_screen.dart';
 
 class AccountScreen extends HookWidget{
+  Future<void> _signOut(NavigatorState navigator) async {
+    await signOut();
+    await navigator.pushNamedAndRemoveUntil(Routes.top, (routes) => routes.settings.name == Routes.top);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,11 +29,11 @@ class AccountScreen extends HookWidget{
             child: Text('ユーザー情報'),
           ),
           const Divider(height: 1, thickness: 1,),
-          _buildListTile(
+          _buildUserInfoListTile(
             context,
             '氏名',
             Text(
-              auth.currentUser.displayName,
+              auth.currentUser.displayName ?? '未登録',
               style: Theme.of(context).textTheme.bodyText1,
             ),
             () => Navigator.of(context).push(
@@ -43,11 +49,11 @@ class AccountScreen extends HookWidget{
             ),
           ),
           const Divider(height: 1, thickness: 1,),
-          _buildListTile(
+          _buildUserInfoListTile(
             context,
             'メールアドレス',
             Text(
-              auth.currentUser.email,
+              auth.currentUser.email ?? '未登録',
               style: Theme.of(context).textTheme.bodyText1,
             ),
             () => Navigator.of(context).push(
@@ -57,21 +63,23 @@ class AccountScreen extends HookWidget{
             ),
           ),
           const Divider(height: 1, thickness: 1,),
-          _buildListTile(
+          _buildUserInfoListTile(
             context,
             'メールアドレスの認証状態',
             TextWithIcon(
-              auth.currentUser.emailVerified ? '認証済み' : '未認証',
+              auth.currentUser.emailVerified ? '認証済み' : auth.currentUser.email == null ? '未登録' : '未認証',
               spacing: 8,
               iconColor: auth.currentUser.emailVerified ? Colors.green : Theme.of(context).errorColor,
               leadingIcon: auth.currentUser.emailVerified ? Icons.verified_user : null,
               style: Theme.of(context).textTheme.bodyText1,
             ),
-            () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const EmailVerifyScreen(),
-              )
-            ),
+            auth.currentUser.email == null
+              ? null //TODO: show error
+              : () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const EmailVerifyScreen(),
+                )
+              ),
           ),
           const Divider(height: 1, thickness: 1,),
 
@@ -85,7 +93,7 @@ class AccountScreen extends HookWidget{
           _buildAccountListTile(
             context,
             'Apple',
-            auth.currentUser.providerData.where((provider) => provider.providerId == 'apple.com').isNotEmpty,
+            auth.currentUser.providerData.any((provider) => provider.providerId == 'apple.com'),
             'Appleアカウントと連携する',
             () => print('Appleと連携'),
           ),
@@ -93,66 +101,80 @@ class AccountScreen extends HookWidget{
           _buildAccountListTile(
             context,
             'Google',
-            auth.currentUser.providerData.where((provider) => provider.providerId == 'google.com').isNotEmpty,
+            auth.currentUser.providerData.any((provider) => provider.providerId == 'google.com'),
             'Googleアカウントと連携する',
-            () => print('Googleと連携'),
+            signInGoogle,
           ),
           const Divider(height: 1, thickness: 1,),
+
+          if(!auth.currentUser.isAnonymous) ...[
+            const SizedBox(height: 64),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text('その他'),
+            ),
+            const Divider(height: 1, thickness: 1,),
+            // TODO: ダイアログを出してログアウト
+            _buildActionListTile(context, const Text('ログアウト'), () => print('ログアウト')),
+            const Divider(height: 1, thickness: 1,),
+            // TODO: ダイアログを出して退会処理
+            _buildActionListTile(context, const Text('退会'), () => print('退会')),
+            const Divider(height: 1, thickness: 1,),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildAccountListTile(BuildContext context, String topic, bool isVerified, String label, void Function() send) {
-    return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => AccountProviderScreen(label: label, send: () async => send(), isVerified: isVerified),
-        )
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 48,
-                    child: Text(topic)
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 48,
+                  child: Text(topic)
+                ),
+                const SizedBox(width: 32),
+                if(isVerified)
+                  TextWithIcon(
+                    '連携済み',
+                    spacing: 8,
+                    iconColor: Colors.green,
+                    leadingIcon: Icons.done,
+                    style: Theme.of(context).textTheme.bodyText1,
                   ),
-                  const SizedBox(width: 32),
-                  if(isVerified)
-                    TextWithIcon(
-                      '連携済み',
-                      spacing: 8,
-                      iconColor: Colors.green,
-                      leadingIcon: Icons.done,
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                  if(!isVerified)
-                    TextWithIcon(
-                      '未連携',
-                      spacing: 8,
-                      iconColor: Theme.of(context).errorColor,
-                      leadingIcon: Icons.clear,
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                ],
-              ),
+                if(!isVerified)
+                  TextWithIcon(
+                    '未連携',
+                    spacing: 8,
+                    iconColor: Theme.of(context).errorColor,
+                    leadingIcon: Icons.clear,
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
+              ],
             ),
-            if(isVerified)
-              const Icon(Icons.chevron_right),
-            if(!isVerified)
-              const Icon(Icons.chevron_right),
-          ],
-        ),
+          ),
+          if(isVerified)
+            FlatButton(
+              onPressed: send,
+              child: const Text('連携済み'),
+            ),
+          if(!isVerified)
+            OutlineButton(
+              onPressed: send,
+              child: const Text('連携する'),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildListTile(BuildContext context, String topic, Widget label, void Function() onTap) {
+  Widget _buildUserInfoListTile(BuildContext context, String topic, Widget label, void Function() onTap) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -168,6 +190,30 @@ class AccountScreen extends HookWidget{
                     topic,
                     style: Theme.of(context).textTheme.caption,
                   ),
+                  const SizedBox(height: 4),
+                  label,
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right)
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionListTile(BuildContext context, Widget label, void Function() onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const SizedBox(height: 4),
                   label,
                 ],

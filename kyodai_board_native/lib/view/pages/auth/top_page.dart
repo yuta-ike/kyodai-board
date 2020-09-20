@@ -49,27 +49,6 @@ class TopPage extends HookWidget{
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // const TextField(
-                      //   decoration: InputDecoration(
-                      //     labelText: 'メールアドレス'
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 16),
-                      // const TextField(
-                      //   decoration: InputDecoration(
-                      //     labelText: 'パスワード'
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 16),
-                      // OutlineButton(
-                      //   child: const Text('ログイン'),
-                      //   onPressed: () => print('Appleでログイン'),
-                      //   borderSide: const BorderSide(
-                      //     color: Colors.black
-                      //   ),
-                      //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))
-                      // ),
-                      // const Divider(height: 64),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: OutlineButton(

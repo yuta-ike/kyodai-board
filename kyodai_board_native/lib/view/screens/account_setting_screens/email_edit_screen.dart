@@ -19,7 +19,13 @@ class EmailEditScreen extends HookWidget{
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        title: const Text('メールアドレス変更'),
+        title: Text(
+          'メールアドレス',
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

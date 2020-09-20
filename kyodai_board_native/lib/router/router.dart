@@ -4,6 +4,7 @@ import 'package:kyodai_board/model/chat_room.dart';
 import 'package:kyodai_board/model/value_objects/query/club_query.dart';
 import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:kyodai_board/router/route_builders/only_reverse_animation_route_builder.dart';
+import 'package:kyodai_board/router/routers/authenticated_route.dart';
 import 'package:kyodai_board/view/pages/auth/email_verify_page.dart';
 import 'package:kyodai_board/view/pages/auth/login_page.dart';
 import 'package:kyodai_board/view/pages/auth/register_page.dart';
@@ -80,11 +81,12 @@ class Router {
           );
       }
     } else {
+
       switch (settings.name) {
         case '/':
           return PageRouteBuilder<void>(
-            settings: const RouteSettings(name: '/mypage'),
-            pageBuilder: (_, __, ___) => MyPage(),
+            settings: const RouteSettings(name: '/clubs'),
+            pageBuilder: (_, __, ___) => ClubPage(),
           );
 
         case '/emailVerify':
@@ -165,62 +167,57 @@ class Router {
             settings: const RouteSettings(name: '/mypage'),
             pageBuilder: (_, __, ___) => MyPage(),
           );
-      }
+  
+        case '/settings/account':
+          return MaterialPageRoute<int>(
+            settings: const RouteSettings(name: '/chat/detail'),
+            builder: (_) => AccountScreen(),
+          );
 
-      final isAnonymous = auth.currentUser.isAnonymous;
-      final isVerified = auth.currentUser.emailVerified;
-
-      if(isAnonymous || !isVerified){
-        return PageRouteBuilder<void>(
-          pageBuilder: (_, __, ___) => Scaffold(
-            body: Center(
-                child: Text('No route defined for ${settings.name}')),
-          )
-        );
-      }else{
         // TODO: チャット利用前にログインを促す
-        switch(settings.name){
-          case '/settings/account':
-            return MaterialPageRoute<int>(
-                settings: const RouteSettings(name: '/chat/detail'),
-                builder: (_) => AccountScreen(),
-              );
-          case '/chat':
-            return PageRouteBuilder<void>(
+        case '/chat':
+          return authenticatedRoute<void>(
+            PageRouteBuilder<void>(
               settings: const RouteSettings(name: '/chat'),
               pageBuilder: (_, __, ___) => ChatPage(),
-            );
+            )
+          );
 
-          case '/chat/detail':
-            final props = settings.arguments as RouterProp<ChatRoom>;
-            if(props.implicit){
-              return OnlyReverseAnimationPageRoute<void>(
+        case '/chat/detail':
+          final props = settings.arguments as RouterProp<ChatRoom>;
+          if(props.implicit){
+            return authenticatedRoute<void>(
+              OnlyReverseAnimationPageRoute<void>(
                 settings: const RouteSettings(name: '/chat/detail'),
                 builder: (_) => ChatScreen(props.arguments),
-              );
-            }else{
-              return MaterialPageRoute<int>(
-                settings: const RouteSettings(name: '/chat/detail'),
-                builder: (_) => ChatScreen(props.arguments),
-              );
-            }
-            break;
-          
-          case '/chat/temporary':
-            final clubId = settings.arguments as String;
-            return MaterialPageRoute<int>(
-              settings: const RouteSettings(name: '/chat/temporary'),
-              builder: (_) => ChatTemporaryScreen(clubId),
-            );
-
-          default:
-            return PageRouteBuilder<void>(
-              pageBuilder: (_, __, ___) => Scaffold(
-                body: Center(
-                    child: Text('No route defined for ${settings.name}')),
               )
             );
-        }
+          }else{
+            return authenticatedRoute<void>(
+              MaterialPageRoute<int>(
+                settings: const RouteSettings(name: '/chat/detail'),
+                builder: (_) => ChatScreen(props.arguments),
+              )
+            );
+          }
+          break;
+        
+        case '/chat/temporary':
+          final clubId = settings.arguments as String;
+          return authenticatedRoute<int>(
+            MaterialPageRoute<int>(
+              settings: const RouteSettings(name: '/chat/temporary'),
+              builder: (_) => ChatTemporaryScreen(clubId),
+            )
+          );
+
+        default:
+          return PageRouteBuilder<void>(
+            pageBuilder: (_, __, ___) => Scaffold(
+              body: Center(
+                  child: Text('No route defined for ${settings.name}')),
+            )
+          );
       }
     }
   }

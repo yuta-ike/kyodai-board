@@ -3,8 +3,16 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kyodai_board/firebase/firebase_auth.dart';
 import 'package:kyodai_board/repo/auth_repo.dart';
 
-final GoogleSignIn _googleSignIn = GoogleSignIn();
+/// 匿名でサインイン
+Future<void> signInAnonymously() async {
+  final userCredential = await auth.signInAnonymously();
+  if(userCredential.additionalUserInfo.isNewUser){
+    await registerUserData(userCredential.user, isAnonymous: true);
+  }
+}
 
+/// Googleでサインイン
+final GoogleSignIn _googleSignIn = GoogleSignIn();
 Future<bool> signInGoogle() async {
   final googleSignInAccount = await _googleSignIn.signIn();
   if(googleSignInAccount == null){
@@ -24,13 +32,7 @@ Future<bool> signInGoogle() async {
   return true;
 }
 
-Future<void> signInAnonymously() async {
-  final userCredential = await auth.signInAnonymously();
-  if(userCredential.additionalUserInfo.isNewUser){
-    await registerUserData(userCredential.user, isAnonymous: true);
-  }
-}
-
+/// メールアドレスでサインイン
 Future<void> signInWithEmail(String email, String password) async {
   final userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
   if(userCredential.additionalUserInfo.isNewUser){
@@ -38,18 +40,20 @@ Future<void> signInWithEmail(String email, String password) async {
   }
 }
 
+/// メールアドレスで登録
 Future<void> signUpWithEmail(String email, String password) async {
+  //TODO: エラーハンドリング
   // try{
     final userCredential = await auth.createUserWithEmailAndPassword(email: email, password: password);
   // }on FirebaseAuthException catch(e){
 
   // }
-
   if (!auth.currentUser.emailVerified) {
-    await auth.currentUser.sendEmailVerification();
+    await sendCode();
   }
 }
 
+/// 認証コードで認証（いる？）
 Future<void> verifyCode(String code) async {
   await auth.checkActionCode(code);
   await auth.applyActionCode(code);
@@ -57,8 +61,21 @@ Future<void> verifyCode(String code) async {
   await registerUserData(auth.currentUser, isAnonymous: false);
 }
 
-Future<void> _sendCode() async {
+/// 認証コードの送信
+Future<void> sendCode() async {
   await auth.currentUser.sendEmailVerification();
 }
 
+/// ログアウト
 Future<void> Function() signOut = auth.signOut;
+
+/// ユーザー情報の変更
+Future<void> updateDisplayName(String newDisplayName){
+  auth.currentUser.updateProfile(displayName: newDisplayName);
+}
+
+/// メールアドレスの変更
+Future<void> updateEmail(String newEmail){
+  //TODO: 再認証が必要
+  auth.currentUser.updateEmail(newEmail);
+}

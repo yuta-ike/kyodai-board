@@ -29,7 +29,7 @@ class EmailVerifyScreen extends HookWidget{
             Padding(
               padding: const EdgeInsets.only(top: 32, bottom: 16),
               child: Text(
-                auth.currentUser.email,
+                auth.currentUser.email ?? '',
                 textAlign: TextAlign.center,
               ),
             ),

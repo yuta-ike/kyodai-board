@@ -5,7 +5,7 @@ import 'package:kyodai_board/router/routes.dart';
 
 
 final routes = {
-  const BottomNavigationBarItem(icon: Icon(Icons.face), title: Text('マイページ')): Routes.mypage,
+  // const BottomNavigationBarItem(icon: Icon(Icons.face), title: Text('マイページ')): Routes.mypage,
   const BottomNavigationBarItem(icon: Icon(Icons.palette), title: Text('団体')): Routes.clubs,
   const BottomNavigationBarItem(icon: Icon(Icons.event), title: Text('ボード')): Routes.boards,
   const BottomNavigationBarItem(icon: Icon(Icons.question_answer), title: Text('チャット')): Routes.chat,
