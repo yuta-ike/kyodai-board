@@ -54,7 +54,7 @@ export default function ClubCreate() {
 							return (
 								<Form.Field key={name}>
 									<label>{label}</label>
-									<input type="number" placeholder={name} value={club[name]?.toString() ?? ""} onChange={e => setClub({ ...club, [name]: e.target.value })} />
+									<input type="number" placeholder={name} value={club[name]?.toString() ?? ""} onChange={e => setClub({ ...club, [name]: Number(e.target.value) })} />
 								</Form.Field>
 							)
 						}else if(type === "boolean"){

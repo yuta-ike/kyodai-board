@@ -25,7 +25,7 @@ extension DynamicCastMap on Map<String, dynamic>{
             throw Exception();
           }
         }).toList();
-      }catch(e){
+      }on Exception catch(_){
         return or;
       }
     }else{

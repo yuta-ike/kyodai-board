@@ -5,20 +5,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/model/club.dart';
-import 'package:kyodai_board/model/club_profile.dart';
 import 'package:kyodai_board/repo/board_repo.dart';
 import 'package:kyodai_board/repo/club_repo.dart';
 import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
-import 'package:kyodai_board/model/util/freq.dart';
-import 'package:kyodai_board/model/enums/campus.dart';
 import 'package:kyodai_board/model/club_bookmark.dart';
-import 'package:kyodai_board/utils/ratio_format.dart';
 import 'package:kyodai_board/view/components/organism/event_card/event_card.dart';
 import 'package:kyodai_board/view/mixins/club_report_dialog.dart';
 import 'package:kyodai_board/view/mixins/show_snackbar.dart';
 import 'package:kyodai_board/view/screens/event_screen.dart';
+import 'package:kyodai_board/utils/ratio_format.dart';
+import 'package:kyodai_board/model/enums/campus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum MenuItems {
@@ -50,7 +48,7 @@ class ClubScreen extends HookWidget{
           : 0;
     });
 
-    final tabController = useTabController(initialLength: 6);
+    final tabController = useTabController(initialLength: 5);
     final tabIndex = useState(0);
     tabController.addListener(() {
       tabIndex.value = tabController.index;
@@ -66,10 +64,11 @@ class ClubScreen extends HookWidget{
     useEffect((){
       clubRepo.fetchIfNull(_clubId);
       eventsRepo.fetchIfEmpty(_clubId);
+      return null;
     }, []);
 
-    final contactInfo = club?.profile?.contactInfo ?? [];
-    final snsInfo = club?.profile?.snsInfo ?? [];
+    final contactInfo = club?.contactInfo ?? [];
+    final snsInfo = club?.snsInfo ?? [];
 
     final key = GlobalKey<ScaffoldState>();
 
@@ -115,7 +114,7 @@ class ClubScreen extends HookWidget{
           children: club == null ? List.generate(6, (index) => const Center())
           :[
             AsyncImage(
-              imageUrl: club.profile.imageUrl,
+              imageUrl: club.imageUrl,
               fit: BoxFit.cover,
               height: MediaQuery.of(context).size.height * 0.25,
               width: MediaQuery.of(context).size.width,
@@ -134,7 +133,7 @@ class ClubScreen extends HookWidget{
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AsyncImage(
-                        imageUrl: club.profile.iconImageUrl,
+                        imageUrl: club.iconImageUrl,
                         imageBuilder: (_, image) => CircleAvatar(
                           radius: 32,
                           backgroundImage: image,
@@ -148,13 +147,13 @@ class ClubScreen extends HookWidget{
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              club.profile.name,
+                              club.name,
                               style: Theme.of(context).textTheme.bodyText1.copyWith(
                                 fontWeight: FontWeight.bold,
                               )
                             ),
                             Text(
-                              club.profile.genre?.join(' '),
+                              club.genre?.join(' ') ?? '',
                               style: Theme.of(context).textTheme.caption,
                             ),
                             const SizedBox(height: 12),
@@ -275,7 +274,7 @@ class ClubScreen extends HookWidget{
                 Tab(text: '活動'),
                 Tab(text: '雰囲気'),
                 Tab(text: 'イベント'),
-                Tab(text: 'タイムライン'),
+                // Tab(text: 'タイムライン'),
                 Tab(text: '情報'),
                 Tab(text: 'SNS/連絡先'),
               ],
@@ -310,12 +309,12 @@ class ClubScreen extends HookWidget{
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _buildPassage('団体紹介', club.profile.description),
-                              _buildPassage('活動頻度', club.profile.freq_display),
-                              _buildPassage('活動への参加', club.profile.obligation_display),
-                              _buildPassage('モチベーション', club.profile.motivation_display),
-                              _buildPassage('練習場所', club.profile.place_display),
-                              _buildPassage('大会・発表会の頻度', club.profile.competition_display),
+                              _buildPassage('団体紹介', club.description),
+                              _buildPassage('活動日', club.freq_display),
+                              _buildPassage('メンバーの説明', club.member_display),
+                              _buildPassage('活動場所', club.place_display),
+                              _buildPassage('費用', club.cost_display),
+                              _buildPassage('大会・発表会など', club.competition_display),
                               const SizedBox(height: 100),
                             ].where((e) => e != null).toList(),
                           ),
@@ -324,9 +323,11 @@ class ClubScreen extends HookWidget{
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _buildPassage('飲み会', club.profile.drinking_display),
-                              _buildPassage('イベント', club.profile.event_display),
-                              _buildPassage('合宿・旅行', club.profile.trip_display),
+                              _buildPassage('活動への参加', club.obligation_display),
+                              _buildPassage('モチベーション', club.motivation_display),
+                              _buildPassage('飲み会', club.drinking_display),
+                              _buildPassage('イベント', club.event_display),
+                              _buildPassage('合宿・旅行', club.trip_display),
                               const SizedBox(height: 100),
                             ].where((e) => e != null).toList(),
                           ),
@@ -346,37 +347,29 @@ class ClubScreen extends HookWidget{
                             ]
                           ),
                         ),
-                        Container(
-                          child: const Text('投稿一覧'),
-                        ),
+                        // Container(
+                        //   child: const Text('投稿一覧'),
+                        // ),
                         SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _buildQandA(context, '部員数', '${club.profile.memberCount}人'),
+                              _buildQandA(context, '部員数', '${club.memberCount}人'),
                               const Divider(),
-                              _buildQandA(context, '男女比', '男：女 = ${club.profile.genderRatio.toFormatRatio()}'),
+                              _buildQandA(context, '男女比', '男：女 = ${club.genderRatio.toFormatRatio()}'),
                               const Divider(),
-                              _buildQandA(context, '主に活動しているキャンパス', '${club.profile.campus.format}'),
+                              _buildQandA(context, '主に活動しているキャンパス', '${club.campus.format}'),
                               const Divider(),
-                              _buildQandA(context, '飲み会頻度', '${club.profile.drinkingFreq.format}'),
+                              _buildQandA(context, 'インカレか', club.isIntercollege ? 'Yes': 'No'),
                               const Divider(),
-                              _buildQandA(context, 'イベント頻度', '${club.profile.eventFreq.format}'),
-                              const Divider(),
-                              _buildQandA(context, '合宿・旅行頻度', '${club.profile.tripFreq.format}'),
-                              const Divider(),
-                              _buildQandA(context, 'インカレか', club.profile.isIntercollege ? 'Yes': 'No'),
-                              const Divider(),
-                              _buildQandA(context, '自分の大学オンリーか', club.profile.isOnlyKU ? 'Yes': 'No'),
-                              const Divider(),
-                              _buildQandA(context, '自分の大学の割合', '${club.profile.kuRatio?.toFormatPercentage()}'),
-                              if(club.profile.isCompany != null) ...[
+                              _buildQandA(context, '自分の大学の割合', '${club.kuRatio?.toFormatPercentage()}'),
+                              if(club.isCompany != null) ...[
                                 const Divider(),
-                                _buildQandA(context, '会社団体か', club.profile.isCompany ? 'Yes': 'No'),
+                                _buildQandA(context, '会社団体か', club.isCompany ? 'Yes': 'No'),
                               ],
-                              if(club.profile.hasSchoolRestrict != null) ...[
+                              if(club.hasSchoolRestrict != null) ...[
                                 const Divider(),
-                                _buildQandA(context, '学部制限があるか', club.profile.hasSchoolRestrict ? 'Yes': 'No'),
+                                _buildQandA(context, '学部制限があるか', club.hasSchoolRestrict ? 'Yes': 'No'),
                               ],
                               const SizedBox(height: 100),
                             ].where((e) => e != null).toList(),
@@ -386,6 +379,14 @@ class ClubScreen extends HookWidget{
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              _buildHeader('ホームページ'),
+                              if(club.homepageUrl == null)
+                                const Center(child: Text('ホームページは登録されていません')),
+                              if(club.homepageUrl != null) ...[
+                                _buildListTile(context, title: 'ホームページ', subtitle: club.homepageUrl, onTap: () async {
+                                  await launch(club.homepageUrl);
+                                }),
+                              ],
                               _buildHeader('SNS'),
                               if(snsInfo.isEmpty)
                                 const Center(child: Text('SNSは登録されていません')),
@@ -542,18 +543,27 @@ class ClubScreen extends HookWidget{
     );
   }
 
-  Widget _buildContact(BuildContext context, ContactInfo contactInfo) {
+  Widget _buildListTile(BuildContext context, { String title, String subtitle, void Function() onTap }){
     return ListTile(
+      onTap: onTap,
+      trailing: const Icon(Icons.chevron_right),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.bodyText1,
+      ),
+      subtitle: Text(subtitle),
+    );
+  }
+
+  Widget _buildContact(BuildContext context, ContactInfo contactInfo) {
+    return _buildListTile(
+      context,
+      title: contactInfo.description,
+      subtitle: contactInfo.contact,
       onTap: () => showModalBottomSheet<void>(
         context: context,
         builder: (_) => _buildContactSheet(context, contactInfo),
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      title: Text(
-        contactInfo.description,
-        style: Theme.of(context).textTheme.bodyText1,
-      ),
-      subtitle: Text(contactInfo.contact),
+      )
     );
   }
 
@@ -581,7 +591,7 @@ class ClubScreen extends HookWidget{
       return null;
     }
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      margin: const EdgeInsets.fromLTRB(8, 16, 8, 8),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: const BoxDecoration(
         color: Colors.cyan,

@@ -33,7 +33,7 @@ class ClubCard extends StatelessWidget{
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: AsyncImage(
-                        imageUrl: club.profile.imageUrl,
+                        imageUrl: club.imageUrl,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -52,7 +52,7 @@ class ClubCard extends StatelessWidget{
                           children: [
                             Flexible(
                               child: Text(
-                                club.profile.name,
+                                club.name,
                                 maxLines: 1,
                                 style: Theme.of(context).textTheme.bodyText1.copyWith(
                                   fontSize: 15,
@@ -74,7 +74,7 @@ class ClubCard extends StatelessWidget{
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          club.profile.genre.join('  '),
+                          club.genre.join('  '),
                           maxLines: 1,
                           style: Theme.of(context).textTheme.caption,
                         ),
@@ -96,7 +96,7 @@ class ClubCard extends StatelessWidget{
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          club.profile.description,
+                          club.description,
                           maxLines: 1,
                           style: Theme.of(context).textTheme.bodyText1.copyWith(
                             fontSize: 13,
@@ -109,18 +109,6 @@ class ClubCard extends StatelessWidget{
                 ),
               ],
             ),
-            // const SizedBox(height: 8),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 8),
-            //   child: Text(
-            //     club.profile.description,
-            //     maxLines: 1,
-            //     style: Theme.of(context).textTheme.bodyText1.copyWith(
-            //       fontSize: 13,
-            //     ),
-            //     overflow: TextOverflow.ellipsis,
-            //   ),
-            // ),
           ],
         ),
       ),

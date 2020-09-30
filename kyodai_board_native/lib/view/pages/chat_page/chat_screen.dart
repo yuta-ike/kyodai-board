@@ -44,6 +44,7 @@ class ChatScreen extends HookWidget{
           chatroom.club = value;
         });
       }
+      return null;
     }, []);
     
     return Scaffold(
@@ -51,7 +52,7 @@ class ChatScreen extends HookWidget{
       // FIXME: 戻るボタンを押した時にエラーが発生する（メモリリーク）
       appBar: AppBar(
         toolbarHeight: 50,
-        title: Text(club?.profile?.name ?? ''),
+        title: Text(club?.name ?? ''),
         leading: Builder(
           builder: (BuildContext context) => IconButton(
             icon: const Icon(Icons.arrow_back_ios),

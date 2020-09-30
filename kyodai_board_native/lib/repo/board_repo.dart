@@ -1,18 +1,18 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kyodai_board/model/board.dart';
+// import 'package:kyodai_board/model/board.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
 import 'package:kyodai_board/model/event.dart';
-import 'package:kyodai_board/model/util/day_of_week.dart';
+import 'package:kyodai_board/model/enums/day_of_week.dart';
 import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:kyodai_board/repo/firebase_repo.dart';
 import 'package:kyodai_board/repo/model/date_range_query.dart';
 import 'package:state_notifier/state_notifier.dart';
 
-final boardProvider = FutureProvider.autoDispose((ref) async {
-  final firestore = ref.read(firestoreProvider);
-  final snapshots = await firestore.state.collection('boards').get();
-  return snapshots.docs.map((snapshot) => Board.fromMap(snapshot.data())).toList();
-});
+// final boardProvider = FutureProvider.autoDispose((ref) async {
+//   final firestore = ref.read(firestoreProvider);
+//   final snapshots = await firestore.state.collection('boards').get();
+//   return snapshots.docs.map((snapshot) => Board.fromMap(snapshot.data())).toList();
+// });
 
 class ScheduleListRepository extends StateNotifier<List<Schedule>>{
   ScheduleListRepository(): super([]);
@@ -51,7 +51,7 @@ class ScheduleSearchListRepository extends StateNotifier<List<Schedule>>{
     }
 
     final snapshots = await query.get();
-    state =  snapshots.docs.map((snapshot) => Schedule.fromMap(snapshot.id, snapshot.data())).toList();
+    state = snapshots.docs.map((snapshot) => Schedule.fromMap(snapshot.id, snapshot.data())).toList();
   }
 }
 

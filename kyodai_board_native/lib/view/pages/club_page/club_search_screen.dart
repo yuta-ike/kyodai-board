@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:kyodai_board/model/enums/campus.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
-import 'package:kyodai_board/model/util/day_of_week.dart';
+import 'package:kyodai_board/model/enums/day_of_week.dart';
 import 'package:kyodai_board/model/value_objects/query/club_query.dart';
-import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:kyodai_board/view/components/atom/search_box.dart';
-import 'package:provider/provider.dart';
 
 class ClubSearchScreen extends HookWidget{
   const ClubSearchScreen({ this.query });

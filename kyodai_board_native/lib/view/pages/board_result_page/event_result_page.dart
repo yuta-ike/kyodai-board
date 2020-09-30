@@ -32,6 +32,7 @@ class EventResultPage extends HookWidget{
 
     useEffect((){
       scheduleSearchRepo.fetch(query);
+      return null;
     }, []);
 
     final bookmarks = useProvider(bookmarkEventProvider).data?.value;

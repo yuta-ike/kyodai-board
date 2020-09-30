@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:kyodai_board/interactor/auth_interactor.dart';
 import 'package:kyodai_board/router/routes.dart';
 

@@ -11,8 +11,6 @@ const postSchedule = adminAPI(async (req, res) => {
 	const ref = await addSchedule(clubId, eventId, {
 		...event,
 		...schedule,
-		clubId: clubId,
-		eventId: eventId,
 		isValid: true,
 	})
 	const result = await ref.get()

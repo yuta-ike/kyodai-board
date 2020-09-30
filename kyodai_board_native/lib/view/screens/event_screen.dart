@@ -6,11 +6,11 @@ import 'package:kyodai_board/repo/board_repo.dart';
 import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
 import 'package:kyodai_board/utils/date_extension.dart';
-import 'package:kyodai_board/model/enums/apply_type.dart';
 import 'package:kyodai_board/view/mixins/club_report_dialog.dart';
 import 'package:kyodai_board/view/mixins/show_snackbar.dart';
 import 'package:kyodai_board/view/screens/club_screen.dart';
 import 'package:kyodai_board/model/event_bookmark.dart';
+import 'package:kyodai_board/model/enums/apply_method.dart';
 import 'package:social_embed_webview/social_embed_webview.dart';
 
 enum MenuItems {
@@ -38,19 +38,19 @@ class EventScreen extends HookWidget{
           child: ListView(
             children: [
               const SizedBox(height: 8),
-              if(schedule.applyTypes.needApply) ...[
+              if(schedule.applyMethods.needApply) ...[
                 _buildChipInfo(
                   context,
                   '応募方法',
-                  schedule.applyTypes.where((element) => element != ApplyType.none).map((e) => e.format).toList()
+                  schedule.applyMethods.where((element) => element != ApplyMethod.none).map((e) => e.format).toList()
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(schedule.applyType_display)
+                  child: Text(schedule.apply_display)
                 ),
               ],
               
-              if(!schedule.applyTypes.needApply)
+              if(!schedule.applyMethods.needApply)
                 _buildInfo(context, '応募方法', '応募は不要です'),
 
               const Divider(),
@@ -69,7 +69,7 @@ class EventScreen extends HookWidget{
               _buildInfo(context, '当日連絡先', schedule.contactCurrentDay),
               const Divider(),
 
-              if(schedule.applyTypes.appApply)
+              if(schedule.applyMethods.appApply)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -78,13 +78,13 @@ class EventScreen extends HookWidget{
                       onPressed: () => Navigator.of(context).pop(false),
                     ),
                     const SizedBox(width: 16),
-                    if(schedule.applyTypes.contains(ApplyType.app))
+                    if(schedule.applyMethods.contains(ApplyMethod.app))
                       RaisedButton(
                         child: const Text('申し込む'),
                         onPressed: () => Navigator.of(context).pop(true),
                       ),
                     const SizedBox(width: 16),
-                    if(schedule.applyTypes.contains(ApplyType.webpage))
+                    if(schedule.applyMethods.contains(ApplyMethod.webpage))
                       RaisedButton(
                         child: const Text('申し込みフォームへ'),
                         onPressed: () => Navigator.of(context).pop(true),
@@ -114,12 +114,14 @@ class EventScreen extends HookWidget{
 
     useEffect((){
       eventRepo.fetchIfNeed(schedule);
+      return null;
     }, []);
     
     useEffect((){
       if(event != null){
-        iconUrl.value = event.iconUrl;
+        iconUrl.value = event.club.iconImageUrl;
       }
+      return null;
     }, [event != null]);
 
     final key = GlobalKey<ScaffoldState>();
@@ -183,7 +185,7 @@ class EventScreen extends HookWidget{
                     child: AsyncImage(
                       imageUrl: iconUrl.value,
                       imageBuilder: (_, image) => CircleAvatar(
-                        radius: 32,
+                        radius: 24,
                         backgroundImage: image,
                       ),
                     ),
@@ -195,14 +197,15 @@ class EventScreen extends HookWidget{
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              event?.title ?? schedule?.title ?? '',
-                              maxLines: 1,
-                              style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
+                            Flexible(
+                              child: Text(
+                                event?.title ?? schedule?.title ?? '',
+                                maxLines: 2,
+                                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             bookmarks.when(
@@ -215,7 +218,7 @@ class EventScreen extends HookWidget{
                                       ? unbookmarkEvent(bookmarks.getWithEventId(event.id))
                                       : bookmarkEvent(event.id, event.clubId),
                                   child: Padding(
-                                    padding: const EdgeInsets.only(top: 3),
+                                    padding: const EdgeInsets.only(top: 3, left: 8),
                                     child: Icon(
                                       isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                                       color: isBookmarked ?? false ? Colors.cyan[600] : Colors.black,
@@ -227,7 +230,7 @@ class EventScreen extends HookWidget{
                           ],
                         ),
                         Text(
-                          event?.hostName ?? schedule?.hostName ?? '',
+                          event?.club?.name ?? schedule?.club?.name ?? '',
                           style: Theme.of(context).textTheme.headline2.copyWith(
                             fontSize: 12,
                           ),
@@ -322,10 +325,10 @@ class EventScreen extends HookWidget{
                     )
                   ),
 
-                  if(event?.applyTypes?.needApply ?? false)
+                  if(event?.applyMethods?.needApply ?? false)
                     const SizedBox(height: 8),
                     
-                  if((event?.applyTypes?.needApply ?? false) && (event.schedules?.isNotEmpty ?? false))
+                  if((event?.applyMethods?.needApply ?? false) && (event.schedules?.isNotEmpty ?? false))
                     Center(
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -586,7 +589,7 @@ class ScheduleListItem extends HookWidget {
             child: Row(
               children: [
                 Container(
-                  width: 70,
+                  width: 80,
                   padding: const EdgeInsets.only(right: 10),
                   child: Text(
                     schedule.startAt.dateFormat(separator: '\n'),
@@ -607,7 +610,7 @@ class ScheduleListItem extends HookWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold)
                       ),
                       Text(
-                        schedule.applyTypes.needApply
+                        schedule.applyMethods.needApply
                             ? '締め切り: ${schedule.applyEndAt.dateFormat()} ${schedule.applyEndAt.timeFormat()}'
                             : '申し込みは不要です',
                         style: Theme.of(context).textTheme.caption.copyWith(fontWeight: FontWeight.bold),
@@ -646,7 +649,7 @@ class ScheduleListItem extends HookWidget {
           OutlineButton(
             onPressed: onPressed,
             child: Text(
-              schedule.applyTypes.needApply ? '詳細 / 申し込み' : '詳細'
+              schedule.applyMethods.needApply ? '詳細 / 申し込み' : '詳細'
             ),
           ),
         

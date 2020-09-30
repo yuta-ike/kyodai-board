@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kyodai_board/utils/get_metadata.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
@@ -53,7 +52,7 @@ class Ogp extends HookWidget{
     );
   }
 
-  void _launchUrl() async {
+  Future<void> _launchUrl() async {
     if (await canLaunch(url)) {
       await launch(
         url,
@@ -62,7 +61,7 @@ class Ogp extends HookWidget{
         enableJavaScript: true,
       );
     } else {
-      throw 'Could not launch $url';
+      throw Exception('Could not launch $url');
     }
   }
 }

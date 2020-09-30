@@ -1,7 +1,7 @@
 import 'package:kyodai_board/model/enums/club_type.dart';
 
 enum ClubTabs{
-  home, bookmark, sportsUnion, sports, culture, music, study, business, job, others
+  home, bookmark, sportsUnion, sports, culture, tech, music, study, business, job, others
 }
 
 const Map<ClubTabs, String> _map = {
@@ -10,6 +10,7 @@ const Map<ClubTabs, String> _map = {
   ClubTabs.sportsUnion: '体育会',
   ClubTabs.sports: '運動',
   ClubTabs.music: '音楽',
+  ClubTabs.tech: '技術',
   ClubTabs.culture: '文化',
   ClubTabs.study: '研究',
   ClubTabs.business: 'ビジネス',
@@ -23,6 +24,7 @@ const Map<ClubTabs, ClubType> _clubTypeMap = {
   ClubTabs.sportsUnion: ClubType.sportsUnion,
   ClubTabs.sports: ClubType.sports,
   ClubTabs.music: ClubType.music,
+  ClubTabs.tech: ClubType.tech,
   ClubTabs.culture: ClubType.culture,
   ClubTabs.study: ClubType.study,
   ClubTabs.business: ClubType.business,

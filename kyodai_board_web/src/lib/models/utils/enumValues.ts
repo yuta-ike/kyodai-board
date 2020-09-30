@@ -1,11 +1,6 @@
-// import { AccountType } from "../club/club"
-// import { Campus, ClubType, DayOfWeek, Freq } from "../club/clubProfile"
-
 import { AccountType } from "../club/clubPrivate"
 import { Campus, ClubType, DayOfWeek, Freq, SubClubType, UnivGrade } from "../club/club"
 import { ApplyMethod, WeatherCancel } from "../event/event"
-
-// type optionType = (arg: string) => "AccountType" extends typeof arg ? AccountType[] : "ClubType" extends typeof arg ? ClubType[] : "Freq" extends typeof arg ? Freq[] : "Campus" extends typeof arg ? Campus[] : DayOfWeek[]
 
 const getValues = (enumType: string) => {
 	if (enumType == "AccountType"){

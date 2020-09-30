@@ -64,5 +64,7 @@ extension RangeEventDateChoice on EventDateChoice{
     if(this == EventDateChoice.today){
       return DatePeriod(now, today.add(const Duration(days: 1)));
     }
+
+    throw UnimplementedError();
   }
 }

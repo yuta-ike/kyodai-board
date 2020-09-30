@@ -54,7 +54,7 @@ class ChatPage extends HookWidget{
                         child: Row(
                           children: [
                             AsyncImage(
-                              imageUrl: chatroom.club.profile.iconImageUrl,
+                              imageUrl: chatroom.club.iconImageUrl,
                               imageBuilder: (context, image) => Padding(
                                 padding: const EdgeInsets.all(8),
                                 child: CircleAvatar(
@@ -64,7 +64,7 @@ class ChatPage extends HookWidget{
                               ),
                             ),
                             Expanded(
-                              child: Text(chatroom.club.profile.name),
+                              child: Text(chatroom.club.name),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16),

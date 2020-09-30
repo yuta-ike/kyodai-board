@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/utils/dynamic_cast_map.dart';
 

@@ -14,7 +14,7 @@ abstract class ReportDialog{
           ClubReportContent.values,
           (content) => content.format,
           (content, body) async {
-            await sendClubReport(club.id, club.profile.name, content.keyString, body);
+            await sendClubReport(club.id, club.name, content.keyString, body);
           }
         );
       }
@@ -29,7 +29,7 @@ abstract class ReportDialog{
           EventReportContent.values,
           (content) => content.format,
           (content, body) async {
-            await sendEventReport(event.id, event.title, event.clubId, event.hostName, content.keyString, body);
+            await sendEventReport(event.id, event.title, event.clubId, event.club.name, content.keyString, body);
           }
         );
       }

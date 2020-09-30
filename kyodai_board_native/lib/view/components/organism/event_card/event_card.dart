@@ -53,23 +53,25 @@ class EventCard extends HookWidget{
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  event.hostName,
-                                  style: Theme.of(context).textTheme.caption.copyWith(
-                                      fontSize: 11,
-                                    ),
-                                ),
-                                Text(
-                                  event.title,
-                                  style: Theme.of(context).textTheme.subtitle1.copyWith(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    event.club.name,
+                                    style: Theme.of(context).textTheme.caption.copyWith(
+                                        fontSize: 11,
+                                      ),
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    event.title,
+                                    style: Theme.of(context).textTheme.subtitle1.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                             bookmarks.when(
                               loading: () => const Icon(Icons.bookmark_border),
@@ -79,7 +81,7 @@ class EventCard extends HookWidget{
                                 return InkWell(
                                   onTap: () => isBookmarked ? unbookmarkEvent(bookmarks.getWithEventId(event.id)) : bookmarkEvent(event.id, event.clubId),
                                   child: Padding(
-                                    padding: const EdgeInsets.only(top: 3),
+                                    padding: const EdgeInsets.only(top: 3, left: 8),
                                     child: Icon(
                                       isBookmarked ?? false ? Icons.bookmark : Icons.bookmark_border,
                                       color: isBookmarked ?? false ? Colors.cyan[600] : Colors.black,
@@ -119,30 +121,6 @@ class EventCard extends HookWidget{
                 ),
               ],
             ),
-            // Container(
-            //   decoration: BoxDecoration(
-            //     color: Colors.grey[100],
-                
-            //   ),
-            //   padding: const EdgeInsets.symmetric(horizontal: 16),
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.end,
-            //     children: [
-            //       Row(
-            //         children: [
-            //           IconButton(
-            //             icon: const Icon(Icons.share),
-            //             onPressed: () => print('share'),
-            //           ),
-            //           IconButton(
-            //             icon: const Icon(Icons.bookmark_border),
-            //             onPressed: () => print('bookmark'),
-            //           ),
-            //         ],
-            //       ),
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),

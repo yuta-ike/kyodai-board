@@ -29,7 +29,7 @@ extension ConvertableMap on Map<String, dynamic>{
       }else{
         return or;
       }
-    }catch(e){
+    }on Exception catch(_){
       return or;
     }
   }
