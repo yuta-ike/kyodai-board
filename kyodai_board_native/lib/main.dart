@@ -4,10 +4,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/router/router.dart';
 import 'package:kyodai_board/view/style/theme.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(ProviderScope(child: MyApp()));
+void main() {
+  Future<void> init() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+    runApp(ProviderScope(child: MyApp()));
+  }
+
+  init();
 }
 
 class MyApp extends StatelessWidget {

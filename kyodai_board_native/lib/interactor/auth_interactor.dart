@@ -42,8 +42,9 @@ Future<void> signInWithEmail(String email, String password) async {
 
 /// メールアドレスで登録
 Future<void> signUpWithEmail(String email, String password) async {
-  //TODO: エラーハンドリング
+  // TODO: エラーハンドリング.
   // try{
+    // ignore: unused_local_variable
     final userCredential = await auth.createUserWithEmailAndPassword(email: email, password: password);
   // }on FirebaseAuthException catch(e){
 
@@ -70,12 +71,12 @@ Future<void> sendCode() async {
 Future<void> Function() signOut = auth.signOut;
 
 /// ユーザー情報の変更
-Future<void> updateDisplayName(String newDisplayName){
-  auth.currentUser.updateProfile(displayName: newDisplayName);
+Future<void> updateDisplayName(String newDisplayName) async {
+  await auth.currentUser.updateProfile(displayName: newDisplayName);
 }
 
 /// メールアドレスの変更
-Future<void> updateEmail(String newEmail){
-  //TODO: 再認証が必要
-  auth.currentUser.updateEmail(newEmail);
+Future<void> updateEmail(String newEmail) async {
+  // TODO: 再認証が必要.
+  await auth.currentUser.updateEmail(newEmail);
 }

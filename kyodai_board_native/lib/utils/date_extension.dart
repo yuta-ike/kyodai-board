@@ -19,8 +19,8 @@ extension FormatDateTime on DateTime{
       }else if(day == today.day + 1){
         return '明日';
       }
-    return dateFormat();
     }
+    return dateFormat();
   }
 
   String approximatelyFormat(){
@@ -32,7 +32,7 @@ extension FormatDateTime on DateTime{
       }else if(day == today.day + 1){
         return '明日';
       }
-    return dateFormat();
     }
+    return dateFormat();
   }
 }

@@ -1,3 +1,5 @@
+import { ApplyMethod } from "../event/event";
+
 export default class Schedule {
 	constructor(
 		readonly startAt: string,
@@ -5,7 +7,7 @@ export default class Schedule {
 		readonly time_display: string,
 		readonly applyStartAt: string,
 		readonly applyEndAt: string,
-		readonly apply_time_display: string,
+		readonly applyTime_display: string,
 	) { }
 }
 
@@ -15,7 +17,7 @@ export const scheduleForm: { [P in keyof Schedule]: [string, string, boolean, Sc
 	time_display: ["string", "時刻について", true, ""],
 	applyStartAt: ["Date", "申し込み開始時刻", true, new Date().toISOString()],
 	applyEndAt: ["Date", "申し込み終了時刻", true, new Date().toISOString()],
-	apply_time_display: ["string", "申し込み時刻について", true, ""],
+	applyTime_display: ["string", "申し込み時刻について", true, ""],
 }
 
 export const scheduleFormRandom: (() => { [P in keyof Schedule]: Schedule[P] }) = () => {
@@ -39,6 +41,6 @@ export const scheduleFormRandom: (() => { [P in keyof Schedule]: Schedule[P] }) 
 		time_display: `${endAt.getHours()}時終了予定ですが1時間ほど延長する可能性があります`,
 		applyStartAt: applyStartAt.toISOString(),
 		applyEndAt: applyEndAt.toISOString(),
-		apply_time_display: `${applyEndAt.getHours()}時までにご連絡ください`,
+		applyTime_display: `${applyEndAt.getHours()}時までにご連絡ください`,
 	}
 }

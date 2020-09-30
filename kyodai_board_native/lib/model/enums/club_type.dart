@@ -1,5 +1,5 @@
 enum ClubType{
-  sportsUnion, sports, culture, music, study, business, job, others
+  sportsUnion, sports, culture, music, tech, study, business, job, none, others
 }
 
 const Map<ClubType, String> _map = {
@@ -7,9 +7,11 @@ const Map<ClubType, String> _map = {
   ClubType.sports: '運動',
   ClubType.culture: '文化',
   ClubType.music: '音楽',
+  ClubType.tech: '技術',
   ClubType.study: '研究',
   ClubType.business: 'ビジネス',
   ClubType.job: 'アルバイト・インターン',
+  ClubType.none: '未選択',
   ClubType.others: 'その他',
 };
 
@@ -30,9 +32,11 @@ extension ConvertableMap on Map<String, dynamic>{
       case 'sports': return ClubType.sports;
       case 'culture': return ClubType.sportsUnion;
       case 'music': return ClubType.music;
+      case 'tech': return ClubType.tech;
       case 'study': return ClubType.study;
       case 'business': return ClubType.business;
       case 'job': return ClubType.job;
+      case 'none': return ClubType.none;
       case 'others': return ClubType.others;
       default: return or;
     }

@@ -24,12 +24,7 @@ export default class Event{
 		readonly belongings: string,
 		readonly notes: string,
 		readonly applyMethods: ApplyMethod[],
-		readonly applyMethods_display: string,
-
-		// readonly clubName: string,
-		// readonly clubShortName: string,
-		// readonly clubType: ClubType,
-		// readonly iconImageUrl: string,
+		readonly apply_display: string,
 	){}
 }
 
@@ -50,7 +45,7 @@ export const eventForm: {[P in keyof Event]: [string, string, boolean, Event[P]?
 	belongings: ["string", "持ち物", true, ""],
 	notes: ["string", "注意事項", true, ""],
 	applyMethods: ["ApplyMethod", "応募方法", true, getApplyMethods()],
-	applyMethods_display: ["string", "応募方法の説明", true, ""],
+	apply_display: ["string", "応募方法の説明", true, ""],
 }
 
 export const eventFormRandom: (() => { [P in keyof Event]: Event[P] }) = () => ({
@@ -70,5 +65,5 @@ export const eventFormRandom: (() => { [P in keyof Event]: Event[P] }) = () => (
 	belongings: getRandom(["運動できる靴と服装・水分","特になし"]),
 	notes: getRandom(["当日飛び入り参加も可能です！", ""]),
 	applyMethods: getRandomMul(getApplyMethods()),
-	applyMethods_display: "",
+	apply_display: "",
 })

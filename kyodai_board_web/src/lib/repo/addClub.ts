@@ -3,6 +3,7 @@ import firestore, { Firestore } from './firestore/firestore'
 
 const addClub = async (_club: Club) => {
 	const { clubPrivate, ...club } = _club
+
 	const result = await firestore.collection("clubs").add({
 		...club,
 		createdAt: Firestore.FieldValue.serverTimestamp(),
@@ -11,6 +12,7 @@ const addClub = async (_club: Club) => {
 		isPublic: false,
 		hasDeleted: false,
 	})
+
 	await firestore.collection("clubs").doc(result.id).collection("private").doc(result.id).set({
 		...clubPrivate,
 		createdAt: Firestore.FieldValue.serverTimestamp(),

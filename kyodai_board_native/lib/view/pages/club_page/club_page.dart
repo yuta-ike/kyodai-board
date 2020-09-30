@@ -15,7 +15,7 @@ import 'package:kyodai_board/view/screens/club_screen.dart';
 class ClubPage extends HookWidget{
   @override
   Widget build(BuildContext context) {
-    final tabController = useTabController(initialLength: 10);
+    final tabController = useTabController(initialLength: ClubTabs.values.length);
 
     final clubs = useProvider(clubListProvider.state);
     final clubsRepo = useProvider(clubListProvider);
@@ -23,6 +23,7 @@ class ClubPage extends HookWidget{
 
     useEffect((){
       clubsRepo.fetch();
+      return null;
     }, []);
 
     final bookmarkedClubs = clubs.where((club) => bookmarks?.containsClubId(club.id)).toList();
@@ -121,7 +122,7 @@ class ClubPage extends HookWidget{
                     ),
               );
             }else{
-              final filteredClubs = clubs.where((club) => club.profile.clubType == ClubTabs.values[pageIndex].clubType).toList();
+              final filteredClubs = clubs.where((club) => club.clubType == ClubTabs.values[pageIndex].clubType).toList();
               return RefreshIndicator(
                 onRefresh: () async => clubsRepo.fetch(),
                 child: clubs == null ? const Center(child: Text('loading')) : filteredClubs.isEmpty ? const Center(child: Text('該当する団体はありませんでした'))

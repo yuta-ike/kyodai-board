@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kyodai_board/interactor/auth_interactor.dart';
@@ -15,6 +14,7 @@ class EmailVerifyPage extends HookWidget{
     await navigator.pushNamedAndRemoveUntil(Routes.mypage, (_) => false);
   }
 
+  // ignore: unused_element
   Future<void> _sendCode() async {
     await _sendCode();
   }

@@ -55,23 +55,25 @@ class ScheduleCard extends HookWidget{
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  schedule.hostName,
-                                  style: Theme.of(context).textTheme.caption.copyWith(
-                                    fontSize: 11,
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    schedule.club.name,
+                                    style: Theme.of(context).textTheme.caption.copyWith(
+                                      fontSize: 11,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  schedule.title,
-                                  style: Theme.of(context).textTheme.subtitle1.copyWith(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                                  Text(
+                                    schedule.title,
+                                    style: Theme.of(context).textTheme.subtitle1.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             InkWell(
                               onTap: bookmark,

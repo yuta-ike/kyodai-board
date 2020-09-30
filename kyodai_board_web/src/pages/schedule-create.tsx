@@ -118,7 +118,8 @@ export default function EventCreate() {
 														} else {
 															return { ...prev, [name]: [...(Array.isArray(prev[name]) ? prev[name] as unknown as string[] : []), option] }
 														}
-													})} />
+													})}
+												/>
 											)
 										})}
 									</div>

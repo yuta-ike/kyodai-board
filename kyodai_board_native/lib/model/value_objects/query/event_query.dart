@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
-import 'package:kyodai_board/model/util/day_of_week.dart';
-import 'package:kyodai_board/model/value_objects/query/club_query.dart';
+import 'package:kyodai_board/model/enums/day_of_week.dart';
 
 enum EventDateChoice{
   all,

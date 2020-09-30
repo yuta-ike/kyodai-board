@@ -4,7 +4,6 @@ import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:kyodai_board/model/chat_room.dart';
 import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/repo/chat_repo.dart';
 import 'package:kyodai_board/repo/club_repo.dart';
@@ -74,7 +73,7 @@ class ChatTemporaryScreen extends HookWidget{
       key: _key,
       appBar: AppBar(
         toolbarHeight: 50,
-        title: Text(readyForShowMessage.value ? (club.data?.profile?.name ?? '') : ''),
+        title: Text(readyForShowMessage.value ? (club.data?.name ?? '') : ''),
         actions: [
           if(club != null)
             PopupMenuButton<MenuItems>(
@@ -187,14 +186,14 @@ class ChatTemporaryScreen extends HookWidget{
         ),
         text: 'チャットルームへようこそ。\n\nこのチャットルームでは、あなたの情報が団体に知られることはありません。完全に匿名でやりとりが可能です。\n\nまた、既読通知も伝わりません。'
       ),
-      if(club?.initialMessage != null && club.initialMessage.isNotEmpty)
+      if(club?.initialChatMessage != null && club.initialChatMessage.isNotEmpty)
         ChatMessage(
           user: ChatUser(
             uid: club.id,
-            name: club.profile.name,
-            avatar: club.profile.iconImageUrl,
+            name: club.name,
+            avatar: club.iconImageUrl,
           ),
-          text: club.initialMessage,
+          text: club.initialChatMessage,
         )
     ];
 }

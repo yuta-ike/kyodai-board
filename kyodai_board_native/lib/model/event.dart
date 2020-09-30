@@ -1,161 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:kyodai_board/model/enums/apply_type.dart';
+import 'package:kyodai_board/model/club.dart';
+import 'package:kyodai_board/model/enums/apply_method.dart';
 import 'package:kyodai_board/model/enums/campus.dart';
 import 'package:kyodai_board/model/enums/weather_cancel.dart';
-import 'package:kyodai_board/model/util/univ_grade.dart';
+import 'package:kyodai_board/model/enums/univ_grade.dart';
 import 'package:kyodai_board/utils/dynamic_cast_map.dart';
 
 abstract class EventBase{
-  String get hostName;
-  String get clubId;
-  String get catchphrase;
-  String get title;
-  String get description;
-  String get imageUrl;
-  String get iconUrl;
-  // 開催場所
-  String get place_display;
-  Campus get campus;
-  // 集合場所
-  String get meetingPlace_display;
-  // 雨天時の対応
-  WeatherCancel get weatherCancel;
-  String get weatherCancel_display;
-  // 連絡先
-  String get contact;
-  // 当日連絡先
-  String get contactCurrentDay;
-  // 参加可能学年
-  List<UnivGrade> get qualifiedGrades;
-  String get entryQualify_display;
-  // 持ち物
-  String get belongings;
-  // 注意事項
-  String get notes;
-  // 予約タイプ
-  List<ApplyType> get applyTypes;
-  String get applyType_display;
-}
-
-class Schedule implements EventBase{
-  const Schedule({
-    this.id,
-    this.eventRef,
-    this.startAt,
-    this.endAt,
-    this.time_display,
-    this.applyStartAt,
-    this.applyEndAt,
-    this.isPublic,
-    this.hostName,
-    this.clubId,
-    this.title,
-    this.catchphrase,
-    this.description,
-    this.imageUrl,
-    this.iconUrl,
-    this.place_display,
-    this.campus,
-    this.meetingPlace_display,
-    this.weatherCancel,
-    this.weatherCancel_display,
-    this.contact,
-    this.contactCurrentDay,
-    this.qualifiedGrades,
-    this.entryQualify_display,
-    this.belongings,
-    this.notes,
-    this.applyTypes,
-    this.applyType_display,
-  });
-  
-  Schedule.fromMap(this.id, Map<String, dynamic> map)
-    : eventRef = map['eventRef'] as DocumentReference
-    , startAt = map.getDate('startAt')
-    , endAt = map.getDate('endAt')
-    , time_display = map.getString('time_display')
-    , applyStartAt = map.getDate('applyStartAt')
-    , applyEndAt = map.getDate('applyEndAt')
-    , isPublic = map.getBool('isPublic')
-    , hostName = map.getString('hostName')
-    , clubId = map.getString('clubId')
-    , title = map.getString('title')
-    , catchphrase = map.getString('catchphrase')
-    , description = map.getString('description')
-    , imageUrl = map.getString('imageUrl')
-    , iconUrl = map.getString('iconUrl')
-    , place_display = map.getString('place_display')
-    , campus = map.getCampus('campus')
-    , meetingPlace_display = map.getString('meetingPlace_display')
-    , weatherCancel = map.getWeatherCancel('weatherCancel')
-    , weatherCancel_display = map.getString('weatherCancel_display')
-    , contact = map.getString('contact')
-    , contactCurrentDay = map.getString('contactCurrentDay')
-    , qualifiedGrades = map.getUnivGrades('qualifiedGrades')
-    , entryQualify_display = map.getString('entryQualify_display')
-    , belongings = map.getString('belongings')
-    , notes = map.getString('notes')
-    , applyTypes = map.getApplyTypes('applyType')
-    , applyType_display = map.getString('applyType_display');
-
-  // ID
-  final String id;
-  // Event ref
-  final DocumentReference eventRef;
-  // 開始時刻
-  final DateTime startAt;
-  // 終了時間
-  final DateTime endAt;
-  final String time_display;
-  // 申し込み開始時刻
-  final DateTime applyStartAt;
-  // 申し込み終了時刻
-  final DateTime applyEndAt;
-  
-  final bool isPublic;
-  final String hostName;
-  final String clubId;
-  final String title;
-  final String catchphrase;
-  final String description;
-  final String imageUrl;
-  final String iconUrl;
-  // 開催場所
-  final String place_display;
-  final Campus campus;
-  // 集合場所
-  final String meetingPlace_display;
-  // 雨天時の対応
-  final WeatherCancel weatherCancel;
-  final String weatherCancel_display;
-  // 連絡先
-  final String contact;
-  // 当日連絡先
-  final String contactCurrentDay;
-  // 参加可能学年
-  final List<UnivGrade> qualifiedGrades;
-  final String entryQualify_display;
-  // 持ち物
-  final String belongings;
-  // 注意事項
-  final String notes;
-  // 予約タイプ
-  final List<ApplyType> applyTypes;
-  final String applyType_display;
-}
-
-class Event implements EventBase{
-  const Event({
-    @required this.id,
-    @required this.isPublic,
-    @required this.hostName,
-    @required this.clubId,
+  const EventBase({
+    @required this.club,
+    @required this.clubRef,
     @required this.title,
-    @required this.catchphrase,
     @required this.description,
     @required this.imageUrl,
-    @required this.iconUrl,
     @required this.place_display,
     @required this.campus,
     @required this.meetingPlace_display,
@@ -163,56 +21,48 @@ class Event implements EventBase{
     @required this.weatherCancel_display,
     @required this.contact,
     @required this.contactCurrentDay,
-    @required this.qualifiedGrades,
-    @required this.entryQualify_display,
     @required this.belongings,
     @required this.notes,
-    @required this.applyTypes,
-    @required this.applyType_display,
-    @required this.schedules,
+    @required this.hasGradesLimit,
+    @required this.qualifiedGrades,
+    @required this.qualifiedGrades_display,
+    @required this.applyMethods,
+    @required this.apply_display,
   });
 
-  Event.fromMap(this.id, Map<String, dynamic> map, this.schedules)
-    : isPublic = map.getBool('isPublic')
-    , hostName = map.getString('hostName') ?? ''
-    , clubId = map.getString('clubId') ?? ''
-    , title = map.getString('title') ?? ''
-    , catchphrase = map.getString('catchphrase')
-    , description = map.getString('description') ?? ''
-    , imageUrl = map.getString('imageUrl') ?? ''
-    , iconUrl = map.getString('iconUrl') ?? ''
-    , place_display = map.getString('place_display') ?? ''
+  EventBase.fromMap(Map<String, dynamic> map)
+    : club = Club.fromMap((map['clubRef'] as DocumentReference).id, map['club'] as Map<String, dynamic>)
+    , clubRef = map['clubRef'] as DocumentReference
+    , title = map.getString('title')
+    , description = map.getString('description')
+    , imageUrl = map.getString('imageUrl')
+    , place_display = map.getString('place_display')
     , campus = map.getCampus('campus')
     , meetingPlace_display = map.getString('meetingPlace_display')
     , weatherCancel = map.getWeatherCancel('weatherCancel')
     , weatherCancel_display = map.getString('weatherCancel_display')
     , contact = map.getString('contact')
     , contactCurrentDay = map.getString('contactCurrentDay')
+    , hasGradesLimit = map.getBool('hasGradesLimit')
     , qualifiedGrades = map.getUnivGrades('qualifiedGrades')
-    , entryQualify_display = map.getString('entryQualify_display')
-    , belongings = map.getString('belongings') ?? ''
-    , notes = map.getString('notes') ?? ''
-    , applyTypes = map.getApplyTypes('applyType')
-    , applyType_display = map.getString('applyType_display');
+    , qualifiedGrades_display = map.getString('qualifiedGrades_display')
+    , belongings = map.getString('belongings')
+    , notes = map.getString('notes')
+    , applyMethods = map.getApplyMethods('applyMethods')
+    , apply_display = map.getString('apply_display');
   
-  // ID
-  final String id;
-  // 公開中か
-  final bool isPublic;
-  // 作成団体名
-  final String hostName;
+  // 団体情報
+  final Club club;
   // 団体ID
-  final String clubId;
+  final DocumentReference clubRef;
+  String get clubId => clubRef.id;
+
   // イベントのタイトル
   final String title;
-  // キャッチフレーズ
-  final String catchphrase;
   // イベントの説明
   final String description;
   // 画像URL
   final String imageUrl;
-  // アイコンURL
-  final String iconUrl;
   // 開催場所
   final String place_display;
   final Campus campus;
@@ -227,16 +77,112 @@ class Event implements EventBase{
   final String contactCurrentDay;
   
   // 参加可能学年
+  final bool hasGradesLimit;
   final List<UnivGrade> qualifiedGrades;
-  final String entryQualify_display;
+  final String qualifiedGrades_display;
+  
   // 持ち物
   final String belongings;
   // 注意事項
   final String notes;
-  // 予約タイプ
-  final List<ApplyType> applyTypes;
-  final String applyType_display;
+  // 応募方法
+  final List<ApplyMethod> applyMethods;
+  // 応募について
+  final String apply_display;
+}
+
+class Schedule extends EventBase{
+  Schedule({
+    this.id,
+    Club club,
+    DocumentReference clubRef,
+    this.eventRef,
+    this.startAt,
+    this.endAt,
+    this.time_display,
+    this.applyStartAt,
+    this.applyEndAt,
+    this.applyTime_display,
+    String title,
+    String description,
+    String imageUrl,
+    String place_display,
+    Campus campus,
+    String meetingPlace_display,
+    WeatherCancel weatherCancel,
+    String weatherCancel_display,
+    String contact,
+    String contactCurrentDay,
+    String belongings,
+    String notes,
+    bool hasGradesLimit,
+    List<UnivGrade> qualifiedGrades,
+    String qualifiedGrades_display,
+    List<ApplyMethod> applyMethods,
+    String apply_display,
+  }): super(club: club, clubRef: clubRef, title: title, description: description, imageUrl: imageUrl,
+        place_display: place_display, campus: campus, meetingPlace_display: meetingPlace_display, weatherCancel: weatherCancel,
+        weatherCancel_display: weatherCancel_display, contact: contact, contactCurrentDay: contactCurrentDay,
+        belongings: belongings, notes: notes, hasGradesLimit: hasGradesLimit, qualifiedGrades: qualifiedGrades,
+        qualifiedGrades_display: qualifiedGrades_display, applyMethods: applyMethods, apply_display: apply_display
+      );
   
+  Schedule.fromMap(this.id, Map<String, dynamic> map)
+    : startAt = map.getDate('startAt')
+    , endAt = map.getDate('endAt')
+    , time_display = map.getString('time_display')
+    , applyStartAt = map.getDate('applyStartAt')
+    , applyEndAt = map.getDate('applyEndAt')
+    , applyTime_display = map.getString('applyTime_display')
+    , eventRef = map['eventRef'] as DocumentReference
+    , super.fromMap(map);
+
+  final String id;
+  final DocumentReference eventRef;
+  String get eventId => eventRef.id;
+  final DateTime startAt;
+  final DateTime endAt;
+  final String time_display;
+  final DateTime applyStartAt;
+  final DateTime applyEndAt;
+  final String applyTime_display;
+}
+
+class Event extends EventBase{
+  const Event({
+    this.id,
+    Club club,
+    DocumentReference clubRef,
+    String title,
+    String description,
+    String imageUrl,
+    String place_display,
+    Campus campus,
+    String meetingPlace_display,
+    WeatherCancel weatherCancel,
+    String weatherCancel_display,
+    String contact,
+    String contactCurrentDay,
+    String belongings,
+    String notes,
+    bool hasGradesLimit,
+    List<UnivGrade> qualifiedGrades,
+    String qualifiedGrades_display,
+    List<ApplyMethod> applyMethods,
+    String apply_display,
+    this.schedules,
+  }): super(club: club, clubRef: clubRef, title: title, description: description, imageUrl: imageUrl,
+        place_display: place_display, campus: campus, meetingPlace_display: meetingPlace_display, weatherCancel: weatherCancel,
+        weatherCancel_display: weatherCancel_display, contact: contact, contactCurrentDay: contactCurrentDay,
+        belongings: belongings, notes: notes, hasGradesLimit: hasGradesLimit, qualifiedGrades: qualifiedGrades,
+        qualifiedGrades_display: qualifiedGrades_display, applyMethods: applyMethods, apply_display: apply_display
+      );
+
+  Event.fromMap(this.id, Map<String, dynamic> map, this.schedules)
+    : super.fromMap(map);
+
+  // ID
+  final String id;
   // 日程
   final List<Schedule> schedules;
 }

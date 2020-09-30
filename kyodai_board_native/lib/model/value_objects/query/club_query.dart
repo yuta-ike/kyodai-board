@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:kyodai_board/model/enums/campus.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
 import 'package:kyodai_board/model/enums/motivation.dart';
 import 'package:kyodai_board/model/enums/obligation.dart';
-import 'package:kyodai_board/model/util/day_of_week.dart';
-import 'package:kyodai_board/model/util/freq.dart';
+import 'package:kyodai_board/model/enums/day_of_week.dart';
+import 'package:kyodai_board/model/enums/freq.dart';
 
 enum GenderRatioChoice{
   male, fifty, female,

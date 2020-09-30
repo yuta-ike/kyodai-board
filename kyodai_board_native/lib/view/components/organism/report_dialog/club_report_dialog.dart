@@ -19,6 +19,7 @@ class ClubReportDialog<T> extends HookWidget{
 
     useEffect((){
       isValid.value = selectedItem.value != null && controller.value.text.isNotEmpty;
+      return null;
     }, [selectedItem.value]);
 
     return AlertDialog(

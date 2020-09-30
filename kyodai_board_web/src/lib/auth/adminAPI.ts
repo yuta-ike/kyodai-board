@@ -11,7 +11,7 @@ const adminAPI = (api: NextAPI) => {
 		try {
 			await verifyIdToken(token)
 			// TODO: Adminユーザー判定
-			return api(req, res)
+			return await api(req, res)
 		} catch (error) {
 			console.log(error)
 			return res.status(401).send('You are unauthorised')

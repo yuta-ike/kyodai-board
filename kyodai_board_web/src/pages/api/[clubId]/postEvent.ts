@@ -12,7 +12,6 @@ const postEvent = adminAPI(async (req, res) => {
 	const ref = await addEvent(clubId, {
 		...event,
 		club: club,
-		clubId: clubId,
 		isValid: true,
 		isPublic: true,
 	})

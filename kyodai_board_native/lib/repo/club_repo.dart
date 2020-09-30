@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/model/enums/campus.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
-import 'package:kyodai_board/model/util/freq.dart';
 import 'package:kyodai_board/model/value_objects/query/club_query.dart';
 import 'package:kyodai_board/repo/firebase_repo.dart';
 import 'package:state_notifier/state_notifier.dart';
@@ -29,62 +28,62 @@ final clubSearchProvider = FutureProvider.autoDispose.family<List<Club>, ClubQue
 
 
   clubs = clubs.where((club){
-    return clubQuery.daysOfWeek.toSet().containsAll(club.profile.daysOfWeek);
+    return clubQuery.daysOfWeek.toSet().containsAll(club.daysOfWeek);
   });
 
   final memberCountStart = memberCountChoices[clubQuery.memberCount.start.floor()];
   final memberCountEnd = memberCountChoices[clubQuery.memberCount.end.floor()];
   if(memberCountStart != null){
-    clubs = clubs.where((club) => club.profile.memberCount >= memberCountStart);
+    clubs = clubs.where((club) => club.memberCount >= memberCountStart);
   }
   if(memberCountEnd != null){
-    clubs = clubs.where((club) => club.profile.memberCount <= memberCountEnd);
+    clubs = clubs.where((club) => club.memberCount <= memberCountEnd);
   }
 
   if(clubQuery.genderRatio != null){
     if(clubQuery.genderRatio == GenderRatioChoice.male){
-      clubs = clubs.where((club) => club.profile.genderRatio >= 0.7);
+      clubs = clubs.where((club) => club.genderRatio >= 0.7);
     }else if(clubQuery.genderRatio == GenderRatioChoice.female){
-      clubs = clubs.where((club) => club.profile.genderRatio <= 0.3);
+      clubs = clubs.where((club) => club.genderRatio <= 0.3);
     }else{
-      clubs = clubs.where((club) => 0.3 <= club.profile.genderRatio && club.profile.genderRatio <= 0.7);
+      clubs = clubs.where((club) => 0.3 <= club.genderRatio && club.genderRatio <= 0.7);
     }
   }
 
   if(clubQuery.campus != null){
     if(clubQuery.campus == CampusChoice.yoshida){
-      clubs = clubs.where((club) => <Campus>[Campus.yoshidaMain, Campus.yoshidaNorth, Campus.yoshidaOthers, Campus.yoshidaSouth, Campus.yoshidaWest].contains(club.profile.campus));
+      clubs = clubs.where((club) => <Campus>[Campus.yoshidaMain, Campus.yoshidaNorth, Campus.yoshidaOthers, Campus.yoshidaSouth, Campus.yoshidaWest].contains(club.campus));
     }else if(clubQuery.campus == CampusChoice.uji){
-      clubs = clubs.where((club) => club.profile.campus == Campus.uji);
+      clubs = clubs.where((club) => club.campus == Campus.uji);
     }else if(clubQuery.campus == CampusChoice.katsura){
-      clubs = clubs.where((club) => club.profile.campus == Campus.katsura);
+      clubs = clubs.where((club) => club.campus == Campus.katsura);
     }else if(clubQuery.campus == CampusChoice.others){
-      clubs = clubs.where((club) => club.profile.campus == Campus.others);
+      clubs = clubs.where((club) => club.campus == Campus.others);
     }
   }
 
   if(clubQuery.isOfficial == true){
-    clubs = clubs.where((club) => club.profile.isOfficial == true);
+    clubs = clubs.where((club) => club.isOfficial == true);
   }
 
   if(clubQuery.isIntercollege == false){
-    clubs = clubs.where((club) => club.profile.isIntercollege == false);
+    clubs = clubs.where((club) => club.isIntercollege == false);
   }
 
-  if(!(clubQuery.freq.start.floor() == 0 && clubQuery.freq.end.floor() == FreqChoice.values.length - 1)){
-    final freqStart = freqChoices[clubQuery.freq.start.floor()];
-    final freqEnd = freqChoices[clubQuery.freq.end.floor()];
-    if(clubQuery.freq.start.floor() == 0){
-      final choices = Freq.values.sublist(0, Freq.values.indexOf(freqEnd) + 1);
-      clubs = clubs.where((club) => choices.contains(club.profile.freq));
-    }else if(clubQuery.freq.end.floor() == FreqChoice.values.length - 1){
-      final choices = Freq.values.sublist(Freq.values.indexOf(freqStart), Freq.values.length);
-      clubs = clubs.where((club) => choices.contains(club.profile.freq));
-    }else{
-      final choices = freqChoices.sublist(clubQuery.freq.start.floor(), clubQuery.freq.end.floor());
-      clubs = clubs.where((club) => choices.contains(club.profile.freq));
-    }
-  }
+  // if(!(clubQuery.freq.start.floor() == 0 && clubQuery.freq.end.floor() == FreqChoice.values.length - 1)){
+  //   final freqStart = freqChoices[clubQuery.freq.start.floor()];
+  //   final freqEnd = freqChoices[clubQuery.freq.end.floor()];
+  //   if(clubQuery.freq.start.floor() == 0){
+  //     final choices = Freq.values.sublist(0, Freq.values.indexOf(freqEnd) + 1);
+  //     clubs = clubs.where((club) => choices.contains(club.freq));
+  //   }else if(clubQuery.freq.end.floor() == FreqChoice.values.length - 1){
+  //     final choices = Freq.values.sublist(Freq.values.indexOf(freqStart), Freq.values.length);
+  //     clubs = clubs.where((club) => choices.contains(club.freq));
+  //   }else{
+  //     final choices = freqChoices.sublist(clubQuery.freq.start.floor(), clubQuery.freq.end.floor());
+  //     clubs = clubs.where((club) => choices.contains(club.freq));
+  //   }
+  // }
 
   return clubs.toList();
 });
@@ -101,7 +100,7 @@ class ClubListRepository extends StateNotifier<List<Club>>{
     if(state == null){
       await fetch();
     }
-    state = state.where((club) => club.profile.clubType == type).toList();
+    state = state.where((club) => club.clubType == type).toList();
   }
 }
 

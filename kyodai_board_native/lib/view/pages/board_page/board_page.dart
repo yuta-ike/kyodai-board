@@ -32,6 +32,7 @@ class BoardPage extends HookWidget{
 
     useEffect((){
       scheduleRepo.fetch();
+      return null;
     }, []);
 
     final bookmarks = useProvider(bookmarkEventProvider).data?.value;

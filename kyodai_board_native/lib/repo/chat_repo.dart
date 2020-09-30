@@ -138,8 +138,8 @@ final chatProvider = StreamProvider.autoDispose.family<List<ChatMessage>, String
             ..user.avatar = null; // TODO: 正しい値をセット
         }else if(chatMessage.user.uid != uid){
           chatMessage
-            ..user.name = chatroom.club.profile.name
-            ..user.avatar = chatroom.club.profile.iconImageUrl;
+            ..user.name = chatroom.club.name
+            ..user.avatar = chatroom.club.iconImageUrl;
         }
 
         messages.add(chatMessage);
