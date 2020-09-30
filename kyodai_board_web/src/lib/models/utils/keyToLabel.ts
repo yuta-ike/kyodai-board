@@ -1,0 +1,45 @@
+const table = {
+	"normal": "標準アカウント",
+	"temporary": "一時アカウント",
+	'sportsUnion': "体育会",
+	'sports': "運動",
+	'culture': "文化",
+	'tech': "技術",
+	'music': "音楽",
+	'study': "研究",
+	'business': "ビジネス",
+	'job': "アルバイト",
+	'others': "その他",
+	'none': "未選択",
+	'almostEveryday': "ほぼ毎日",
+	'fiveTimesPerWeek': "週5",
+	'fourTimesPerWeek': "週4",
+	'threeTimesPerWeek': "週3",
+	'twicePerWeek': "週2",
+	'oncePerWeek': "週1",
+	'twicePerMonth': "月2",
+	'oncePerMonth': "月1",
+	'oncePerTwoMonth': "2ヶ月に1回",
+	'oncePerThreeMonth': "3ヶ月に1回",
+	'threeTimesPerYear': "年3",
+	'oncePerHalfYear': "年2",
+	'oncePerYear': "年1",
+	'moreRare': "年1未満",
+	'yoshida': "吉田キャンパス周辺",
+	'uji': "宇治キャンパス周辺",
+	'katsura': "桂キャンパス周辺",
+	'sunday' : "日曜",
+	'monday': "月曜",
+	'tuesday': "火曜",
+	'wednesday': "水曜",
+	'thursday': "木曜",
+	'friday': "金曜",
+	'saturday': "土曜",
+	'irregular': "不定期",
+}
+
+
+const keyToLabel: (key: string) => string
+	= (key) => key in table ? (table as { [key: string]: string })[key] : key
+
+export default keyToLabel
