@@ -132,7 +132,8 @@ class EventScreen extends HookWidget{
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         toolbarHeight: 40,
-        backgroundColor: Colors.black.withOpacity(0.1),
+        backgroundColor: Colors.black.withOpacity(0.2),
+        elevation: 0,
         iconTheme: Theme.of(context).iconTheme.copyWith(
           color: Colors.white,
         ),

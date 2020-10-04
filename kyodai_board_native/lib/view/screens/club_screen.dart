@@ -97,6 +97,7 @@ class ClubScreen extends HookWidget{
       appBar: AppBar(
         toolbarHeight: 50,
         backgroundColor: Colors.black.withOpacity(0.2),
+        elevation: 0,
         actions: [
           PopupMenuButton<MenuItems>(
             initialValue: MenuItems.report,
