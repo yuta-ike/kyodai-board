@@ -20,7 +20,6 @@ extension ClubTypeString on ClubType{
   String get keyString => toString().split('.')[1];
 }
 
-
 extension ConvertableMap on Map<String, dynamic>{
   ClubType getClubType(String key, { ClubType or }){
     final dynamic value = this[key];

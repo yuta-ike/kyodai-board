@@ -1,13 +1,9 @@
 enum Campus{
-  yoshidaMain, yoshidaNorth, yoshidaSouth, yoshidaWest, yoshidaOthers, uji, katsura, others,
+  yoshida, uji, katsura, others,
 }
 
 const Map<Campus, String> _map = {
-  Campus.yoshidaMain: '本部キャンパス',
-  Campus.yoshidaNorth: '農学部キャンパス',
-  Campus.yoshidaSouth: '吉田南キャンパス',
-  Campus.yoshidaWest: '西部構内',
-  Campus.yoshidaOthers: 'その他の吉田キャンパス',
+  Campus.yoshida: '吉田キャンパス',
   Campus.uji: '宇治キャンパス',
   Campus.katsura: '桂キャンパス',
   Campus.others: 'その他',
@@ -25,14 +21,37 @@ extension ConvertableMap on Map<String, dynamic>{
       return or;
     }
     switch(value as String){
-      case 'yoshidaMain': return Campus.yoshidaMain;
-      case 'yoshidaNorth': return Campus.yoshidaNorth;
-      case 'yoshidaSouth': return Campus.yoshidaSouth;
-      case 'yoshidaWest': return Campus.yoshidaWest;
-      case 'yoshidaOthers': return Campus.yoshidaOthers;
+      case 'yoshida': return Campus.yoshida;
       case 'uji': return Campus.uji;
       case 'katsura': return Campus.katsura;
+      case 'others': return Campus.others;
       default: return or;
+    }
+  }
+
+  List<Campus> getCampusList(String key, { List<Campus> or }){
+    final dynamic value = this[key];
+    try{
+      if(value is List<dynamic>){
+        return value
+                .map<String>((dynamic e) => e as String)
+                .map<Campus>((e){
+                  switch(e){
+                    case 'yoshida': return Campus.yoshida;
+                    case 'uji': return Campus.uji;
+                    case 'katsura': return Campus.katsura;
+                    case 'others': return Campus.others;
+                    default:
+                      assert(false, 'Unexpected Error');
+                      return null;
+                  }
+                })
+                .where((e) => e != null)
+                .toList();
+      }
+      return or;
+    } on Exception catch(_){
+      return or;
     }
   }
 }

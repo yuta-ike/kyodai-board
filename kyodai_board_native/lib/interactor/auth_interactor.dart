@@ -32,43 +32,15 @@ Future<bool> signInGoogle() async {
   return true;
 }
 
-/// メールアドレスでサインイン
-Future<void> signInWithEmail(String email, String password) async {
-  final userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
-  if(userCredential.additionalUserInfo.isNewUser){
-    await registerUserData(userCredential.user, isAnonymous: false);
-  }
-}
-
-/// メールアドレスで登録
-Future<void> signUpWithEmail(String email, String password) async {
-  // TODO: エラーハンドリング.
-  // try{
-    // ignore: unused_local_variable
-    final userCredential = await auth.createUserWithEmailAndPassword(email: email, password: password);
-  // }on FirebaseAuthException catch(e){
-
-  // }
-  if (!auth.currentUser.emailVerified) {
-    await sendCode();
-  }
-}
-
-/// 認証コードで認証（いる？）
-Future<void> verifyCode(String code) async {
-  await auth.checkActionCode(code);
-  await auth.applyActionCode(code);
-  await auth.currentUser.reload();
-  await registerUserData(auth.currentUser, isAnonymous: false);
-}
-
-/// 認証コードの送信
-Future<void> sendCode() async {
-  await auth.currentUser.sendEmailVerification();
-}
-
 /// ログアウト
 Future<void> Function() signOut = auth.signOut;
+
+/// 退会
+Future<void> withdraw() async {
+  // TODO: reauth
+  // auth.currentUser.reauthenticateWithCredential(credential)
+  await auth.currentUser.delete();
+}
 
 /// ユーザー情報の変更
 Future<void> updateDisplayName(String newDisplayName) async {
@@ -80,3 +52,49 @@ Future<void> updateEmail(String newEmail) async {
   // TODO: 再認証が必要.
   await auth.currentUser.updateEmail(newEmail);
 }
+
+/// Googleアカウントと連携
+Future<void> linkToGoogle() async {
+  final googleUser = await _googleSignIn.signIn();
+  final googleAuth = await googleUser.authentication;
+  final googleCredential = GoogleAuthProvider.credential(
+    accessToken: googleAuth.accessToken,
+    idToken: googleAuth.idToken,
+  );
+  await auth.currentUser.linkWithCredential(googleCredential);
+}
+
+// /// メールアドレスでサインイン
+// Future<void> signInWithEmail(String email, String password) async {
+//   final userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
+//   if(userCredential.additionalUserInfo.isNewUser){
+//     await registerUserData(userCredential.user, isAnonymous: false);
+//   }
+// }
+
+// /// メールアドレスで登録
+// Future<void> signUpWithEmail(String email, String password) async {
+//   // TODO: エラーハンドリング.
+//   // try{
+//     // ignore: unused_local_variable
+//     final userCredential = await auth.createUserWithEmailAndPassword(email: email, password: password);
+//   // }on FirebaseAuthException catch(e){
+
+//   // }
+//   if (!auth.currentUser.emailVerified) {
+//     await sendCode();
+//   }
+// }
+
+// /// 認証コードで認証（いる？）
+// Future<void> verifyCode(String code) async {
+//   await auth.checkActionCode(code);
+//   await auth.applyActionCode(code);
+//   await auth.currentUser.reload();
+//   await registerUserData(auth.currentUser, isAnonymous: false);
+// }
+
+// /// 認証コードの送信
+// Future<void> sendCode() async {
+//   await auth.currentUser.sendEmailVerification();
+// }

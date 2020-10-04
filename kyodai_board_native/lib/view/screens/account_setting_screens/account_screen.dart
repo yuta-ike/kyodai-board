@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kyodai_board/firebase/firebase_auth.dart';
@@ -11,118 +12,121 @@ import 'package:kyodai_board/view/screens/account_setting_screens/email_verify_s
 class AccountScreen extends HookWidget{
   Future<void> _signOut(NavigatorState navigator) async {
     await signOut();
-    await navigator.pushNamedAndRemoveUntil(Routes.top, (routes) => routes.settings.name == Routes.top);
+    await navigator.pushNamedAndRemoveUntil(Routes.top, (routes) => false);
+  }
+
+  Future<void> _signInGoogle(NavigatorState navigator) async {
+    await linkToGoogle();
   }
 
   @override
   Widget build(BuildContext context) {
+    useStream<User>(auth.authStateChanges());
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        title: const Text('アカウント情報'),
+        title: Text(
+          'アカウント情報',
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
       ),
-      body: ListView(
-        children: [
-          const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text('ユーザー情報'),
-          ),
-          const Divider(height: 1, thickness: 1,),
-          _buildUserInfoListTile(
-            context,
-            '氏名',
-            Text(
-              auth.currentUser.displayName ?? '未登録',
-              style: Theme.of(context).textTheme.bodyText1,
+      body: auth.currentUser == null ? null :
+        ListView(
+          children: [
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text('ユーザー情報'),
             ),
-            () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => AccountEditScreen(
-                  title: '氏名変更',
-                  label: '新しい氏名を入力してください',
-                  hintText: '新しい氏名',
-                  initValue: auth.currentUser.displayName,
-                  send: (x) async => print(x),
-                ),
-              )
-            ),
-          ),
-          const Divider(height: 1, thickness: 1,),
-          _buildUserInfoListTile(
-            context,
-            'メールアドレス',
-            Text(
-              auth.currentUser.email ?? '未登録',
-              style: Theme.of(context).textTheme.bodyText1,
-            ),
-            () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => EmailEditScreen(auth.currentUser.email),
-              )
-            ),
-          ),
-          const Divider(height: 1, thickness: 1,),
-          _buildUserInfoListTile(
-            context,
-            'メールアドレスの認証状態',
-            TextWithIcon(
-              auth.currentUser.emailVerified ? '認証済み' : auth.currentUser.email == null ? '未登録' : '未認証',
-              spacing: 8,
-              iconColor: auth.currentUser.emailVerified ? Colors.green : Theme.of(context).errorColor,
-              leadingIcon: auth.currentUser.emailVerified ? Icons.verified_user : null,
-              style: Theme.of(context).textTheme.bodyText1,
-            ),
-            auth.currentUser.email == null
-              ? null //TODO: show error
-              : () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const EmailVerifyScreen(),
-                )
+            // const Divider(height: 1, thickness: 1,),
+            // _buildUserInfoListTile(
+            //   context,
+            //   '氏名',
+            //   Text(
+            //     auth.currentUser.displayName ?? '未登録',
+            //     style: Theme.of(context).textTheme.bodyText1,
+            //   ),
+            //   () => Navigator.of(context).push(
+            //     MaterialPageRoute<void>(
+            //       builder: (_) => AccountEditScreen(
+            //         title: '氏名変更',
+            //         label: '新しい氏名を入力してください',
+            //         hintText: '新しい氏名',
+            //         initValue: auth.currentUser.displayName,
+            //         send: (x) async => print(x),
+            //       ),
+            //     )
+            //   ),
+            // ),
+            const Divider(height: 1, thickness: 1,),
+            _buildUserInfoListTile(
+              context,
+              'メールアドレス',
+              Text(
+                auth.currentUser.email ?? '未登録',
+                style: Theme.of(context).textTheme.bodyText1,
               ),
-          ),
-          const Divider(height: 1, thickness: 1,),
+              null
+            ),
+            const Divider(height: 1, thickness: 1,),
+            _buildUserInfoListTile(
+              context,
+              'メールアドレスの認証状態',
+              TextWithIcon(
+                auth.currentUser.emailVerified ? '認証済み' : auth.currentUser.email == null ? '未登録' : '未認証',
+                spacing: 8,
+                iconColor: auth.currentUser.emailVerified ? Colors.green : Theme.of(context).errorColor,
+                leadingIcon: auth.currentUser.emailVerified ? Icons.verified_user : Icons.clear,
+                style: Theme.of(context).textTheme.bodyText1,
+              ),
+              null,
+            ),
+            const Divider(height: 1, thickness: 1,),
 
-          const SizedBox(height: 64),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text('アカウント連携'),
-          ),
-          const Divider(height: 1, thickness: 1,),
-          // TODO: AppleのProvider IDを正しいものに差し替え
-          _buildAccountListTile(
-            context,
-            'Apple',
-            auth.currentUser.providerData.any((provider) => provider.providerId == 'apple.com'),
-            'Appleアカウントと連携する',
-            () => print('Appleと連携'),
-          ),
-          const Divider(height: 1, thickness: 1,),
-          _buildAccountListTile(
-            context,
-            'Google',
-            auth.currentUser.providerData.any((provider) => provider.providerId == 'google.com'),
-            'Googleアカウントと連携する',
-            signInGoogle,
-          ),
-          const Divider(height: 1, thickness: 1,),
+            const SizedBox(height: 64),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text('アカウント連携'),
+            ),
+            const Divider(height: 1, thickness: 1,),
+            // TODO: AppleのProvider IDを正しいものに差し替え
+            _buildAccountListTile(
+              context,
+              'Apple',
+              auth.currentUser.providerData.any((provider) => provider.providerId == 'apple.com'),
+              'Appleアカウントと連携する',
+              () => print('Appleと連携'),
+            ),
+            const Divider(height: 1, thickness: 1,),
+            _buildAccountListTile(
+              context,
+              'Google',
+              auth.currentUser.providerData.any((provider) => provider.providerId == 'google.com'),
+              'Googleアカウントと連携する',
+              () => _signInGoogle(Navigator.of(context)),
+            ),
+            const Divider(height: 1, thickness: 1,),
 
-          if(!auth.currentUser.isAnonymous) ...[
             const SizedBox(height: 64),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text('その他'),
             ),
             const Divider(height: 1, thickness: 1,),
-            // TODO: ダイアログを出してログアウト
-            _buildActionListTile(context, const Text('ログアウト'), () => print('ログアウト')),
+            _buildActionListTile(context, const Text('ログアウト'), () => _signOut(Navigator.of(context))),
             const Divider(height: 1, thickness: 1,),
-            // TODO: ダイアログを出して退会処理
-            _buildActionListTile(context, const Text('退会'), () => print('退会')),
-            const Divider(height: 1, thickness: 1,),
+
+            if(!auth.currentUser.isAnonymous) ...[
+              // TODO: ダイアログを出して退会処理
+              _buildActionListTile(context, const Text('退会'), withdraw),
+              const Divider(height: 1, thickness: 1,),
+            ],
           ],
-        ],
-      ),
+        ),
     );
   }
 
@@ -195,7 +199,8 @@ class AccountScreen extends HookWidget{
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right)
+            if(onTap != null)
+              const Icon(Icons.chevron_right),
           ],
         ),
       ),

@@ -18,7 +18,13 @@ class AccountEditScreen extends HookWidget{
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        title: Text(title),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

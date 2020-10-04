@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/model/value_objects/query/club_query.dart';
-import 'package:kyodai_board/repo/board_repo.dart';
 import 'package:kyodai_board/repo/club_repo.dart';
 import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/organism/buttom_navigation/bottom_navigation.dart';
 import 'package:kyodai_board/view/components/organism/club_card/club_card.dart';
-import 'package:kyodai_board/view/components/organism/event_card/event_card.dart';
 import 'package:kyodai_board/view/screens/club_screen.dart';
 import 'package:kyodai_board/view/screens/event_screen.dart';
 
@@ -24,7 +22,32 @@ class ClubResultPage extends HookWidget{
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        title: const Text('検索結果')
+        title: clubs.when(
+          loading: () => null,
+          error: (dynamic _, __) => null,
+          data: (clubs) => Text.rich(
+            TextSpan(
+              text: '検索結果  全 ',
+              style: Theme.of(context).textTheme.subtitle1.copyWith(
+                fontSize: 15,
+                color: Colors.white,
+              ),
+              children: [
+                TextSpan(
+                  text: '${clubs.length ?? ' '}',
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const TextSpan(
+                  text: ' 件',
+                ),
+              ],
+            )
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
           icon: const Icon(Icons.search),

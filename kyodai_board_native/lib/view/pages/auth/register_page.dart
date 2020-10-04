@@ -10,7 +10,7 @@ class RegisterPage extends HookWidget{
   }
 
   Future<void> _register(NavigatorState navigator, String email, String password) async {
-    await signUpWithEmail(email, password);
+    // await signUpWithEmail(email, password);
     await navigator.pushReplacementNamed(Routes.emailVerify);
   }
 

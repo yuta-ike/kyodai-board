@@ -28,14 +28,12 @@ Future<void> bookmarkClub(String clubId) async {
 
 Future<void> unbookmarkClub(ClubBookmark bookmark) async {
   final uid = auth.currentUser.uid;
-  print(bookmark.id);
   await fsinstance.collection('users').doc(uid).collection('bookmarkClubs').doc(bookmark.id).delete();
 }
 
 final bookmarkClubProvider = StreamProvider<List<ClubBookmark>>((ref) async* {
   final uid = auth.currentUser.uid;
   var bookmarks = <ClubBookmark>[];
-  print(uid);
   yield [];
 
   await for(final snapshot in fsinstance.collection('users').doc(uid).collection('bookmarkClubs').orderBy('createdAt').snapshots()){

@@ -21,7 +21,6 @@ class ChatTemporaryScreen extends HookWidget{
   // ignore: always_require_non_null_named_parameters
   ChatTemporaryScreen(this.clubId);
 
-  final GlobalKey<DashChatState> _chatViewKey = GlobalKey<DashChatState>();
   final String clubId;
 
 
@@ -30,16 +29,16 @@ class ChatTemporaryScreen extends HookWidget{
     await Navigator.pushReplacementNamed(context, Routes.chatDetail, arguments: RouterProp(chatroom, implicit: true));
   }
 
-  final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
+  // final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    final user = useState(getChatUser()).value;
+    final user = useMemoized(getChatUser);
     final chatroom = useChatroomWithId(clubId);
     final club = useClub(clubId);
     final readyForShowMessage = useState(false);
 
-    if(chatroom.data != null){
+    if(chatroom.data != null && chatroom.data.club == null){
       chatroom.data.club = club.data;
     }
 
@@ -59,7 +58,6 @@ class ChatTemporaryScreen extends HookWidget{
       return null;
     }, [chatroom.connectionState, club.connectionState]);
 
-    
     final initialMessages = useState(<ChatMessage>[]);
 
     useEffect((){
@@ -69,11 +67,20 @@ class ChatTemporaryScreen extends HookWidget{
       return null;
     }, [club.connectionState]);
 
+    final scaffoldKey = useMemoized(() => GlobalKey<ScaffoldState>(), []);
+    final chatKey = useMemoized(() => GlobalKey<DashChatState>(), []);
+
     return Scaffold(
-      key: _key,
+      key: scaffoldKey,
       appBar: AppBar(
         toolbarHeight: 50,
-        title: Text(readyForShowMessage.value ? (club.data?.name ?? '') : ''),
+        title: Text(
+          readyForShowMessage.value ? (club.data?.name ?? '') : '',
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
         actions: [
           if(club != null)
             PopupMenuButton<MenuItems>(
@@ -84,7 +91,7 @@ class ChatTemporaryScreen extends HookWidget{
                 if(item == MenuItems.report){
                   final result = await ReportDialog.showClubReport(context, club.data);
                   if(result ?? false){
-                    ShowSnackBar.show(_key.currentState, '通報を完了しました');
+                    ShowSnackBar.show(scaffoldKey.currentState, '通報を完了しました');
                   }
                 }
               },
@@ -98,10 +105,12 @@ class ChatTemporaryScreen extends HookWidget{
         ],
       ),
       body: SafeArea(
-        child: chatroom.connectionState != ConnectionState.done
-          ? const Center(child: Text('loading'))
-          : DashChat(
-              key: _chatViewKey,
+        child:
+          // chatroom.connectionState != ConnectionState.done
+          // ? const Center(child: Text('loading'))
+          // :
+            DashChat(
+              key: chatKey,
               onSend: (message) => _send(context, message, initialMessages.value),
               sendOnEnter: true,
               textInputAction: TextInputAction.send,
@@ -113,7 +122,7 @@ class ChatTemporaryScreen extends HookWidget{
               dateFormat: DateFormat('yyyy年MM月dd日'),
               timeFormat: DateFormat('HH:mm'),
               messages: readyForShowMessage.value ? initialMessages.value : [],
-              scrollToBottom: true,
+              scrollToBottom: false,
               onPressAvatar: (ChatUser user) {
                 print('OnPressAvatar: ${user.name}');
               },

@@ -2,6 +2,7 @@ import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kyodai_board/firebase/analytics.dart';
 import 'package:kyodai_board/model/value_objects/query/club_query.dart';
 import 'package:kyodai_board/model/club_bookmark.dart';
 import 'package:kyodai_board/repo/club_repo.dart';
@@ -22,7 +23,7 @@ class ClubPage extends HookWidget{
     final bookmarks = useProvider(bookmarkClubProvider).data?.value;
 
     useEffect((){
-      clubsRepo.fetch();
+      clubsRepo.fetchIfEmpty();
       return null;
     }, []);
 
@@ -33,6 +34,7 @@ class ClubPage extends HookWidget{
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 50,
+          automaticallyImplyLeading: false,
           bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
             indicator: BubbleTabIndicator(
@@ -86,10 +88,10 @@ class ClubPage extends HookWidget{
                           ClubCard(
                             clubs[index],
                             onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute<ClubScreen>(
-                                builder: (_) => ClubScreen(club: clubs[index])
+                                MaterialPageRoute<ClubScreen>(
+                                  builder: (_) => ClubScreen(club: clubs[index])
+                                ),
                               ),
-                            ),
                             isBookmarked: bookmarks?.containsClubId(clubs[index].id),
                             bookmark: bookmarks == null ? null : () =>
                                 bookmarks.containsClubId(clubs[index].id)
@@ -109,10 +111,10 @@ class ClubPage extends HookWidget{
                           ClubCard(
                             filteredClubs[index],
                             onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute<ClubScreen>(
-                                builder: (_) => ClubScreen(club: filteredClubs[index])
+                                MaterialPageRoute<ClubScreen>(
+                                  builder: (_) => ClubScreen(club: filteredClubs[index])
+                                ),
                               ),
-                            ),
                             isBookmarked: bookmarks?.containsClubId(filteredClubs[index].id),
                             bookmark: bookmarks == null ? null : () =>
                                 bookmarks.containsClubId(filteredClubs[index].id)

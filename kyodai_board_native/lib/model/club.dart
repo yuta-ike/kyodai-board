@@ -77,7 +77,7 @@ class Club{
     , genderRatio = map.getDouble('genderRatio')
     , kuRatio = map.getDouble('kuRatio')
     , member_display = map.getString('member_display')
-    , campus = map.getCampus('campus')
+    , campus = map.getCampusList('campus')
     , place_display = map.getString('place_display')
     , cost_display = map.getString('cost_display')
     , daysOfWeek = map.getDayOfWeeks('daysOfWeek')
@@ -146,7 +146,7 @@ class Club{
   // メンバー説明
   final String member_display;
   // 練習場所
-  final Campus campus;
+  final List<Campus> campus;
   final String place_display;
   // 費用
   final String cost_display;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
-import 'package:kyodai_board/model/enums/day_of_week.dart';
+import 'package:kyodai_board/model/enums/place.dart';
 import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +12,7 @@ class EventSearchScreen extends HookWidget{
 
   @override
   Widget build(BuildContext context) {
-    final isDetail = useState(false);
+    // final isDetail = useState(false);
 
     return Scaffold(
       appBar: AppBar(
@@ -34,33 +34,33 @@ class EventSearchScreen extends HookWidget{
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildHeader(context, '日付'),
+                    _buildHeader(context, 'イベント種別'),
+                    _buildMultiChoiceChips<ClubType>(context, {
+                      for (final e in ClubType.values.where((element) => element != ClubType.none)) e : e.format
+                    }),
+
+                    _buildHeader(context, '日程'),
                     _buildDataChoiceChips(context, {
                       for (final e in EventDateChoice.values) e : e.format
                     }),
 
-                    _buildHeader(context, 'イベント種別'),
-                    _buildMultiChoiceChips<ClubType>(context, {
-                      for (final e in ClubType.values) e : e.format
+                    _buildHeader(context, '集合場所'),
+                    _buildMultiChoiceChips<Place>(context, {
+                      for (final e in Place.values) e : e.format
                     }),
 
-                    if(isDetail.value)
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Column(
-                          children: [
-                            _buildHeader(context, '実施曜日'),
-                            _buildMultiChoiceChips<DayOfWeek>(context, {
-                              for (final e in DayOfWeek.values.sortInDayOrder(start: DayOfWeek.monday)) e : e.format
-                            }),
-                            // TODO: 未実装
-                            // _buildHeader(context, '時間帯'),
-                            // _buildMultiChoiceChips<EventTime>(context, {
-                            //   for (final e in EventTime.values) e : e.format
-                            // }),
-                          ]
-                        ),
-                      ),
+                    // if(isDetail.value)
+                    //   Container(
+                    //     padding: const EdgeInsets.symmetric(vertical: 16),
+                    //     child: Column(
+                    //       children: [
+                    //         _buildHeader(context, '実施曜日'),
+                    //         _buildMultiChoiceChips<DayOfWeek>(context, {
+                    //           for (final e in DayOfWeek.values.sortInDayOrder(start: DayOfWeek.monday)) e : e.format
+                    //         }),
+                    //       ]
+                    //     ),
+                    //   ),
 
                     const SizedBox(height: 16),
 
@@ -73,11 +73,11 @@ class EventSearchScreen extends HookWidget{
                       child: const Text('検索'),
                     ),
 
-                    if(!isDetail.value)
-                      OutlineButton(
-                        onPressed: () => isDetail.value = !isDetail.value,
-                        child: const Text('詳細検索'),
-                      ),
+                    // if(!isDetail.value)
+                    //   OutlineButton(
+                    //     onPressed: () => isDetail.value = !isDetail.value,
+                    //     child: const Text('詳細検索'),
+                    //   ),
                   ],
                 ),
             ),

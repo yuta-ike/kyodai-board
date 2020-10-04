@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
@@ -20,15 +19,12 @@ class ChatScreen extends HookWidget{
   // ignore: always_require_non_null_named_parameters
   ChatScreen(this.chatroom);
 
-  final GlobalKey<DashChatState> _chatViewKey = GlobalKey<DashChatState>();
   final ChatRoom chatroom;
 
   void _send(BuildContext context, ChatMessage message){
     sendMessage(chatroom.id, message);
     print(message.toJson());
   }
-
-  final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +43,21 @@ class ChatScreen extends HookWidget{
       return null;
     }, []);
     
+    final scaffoldKey = useMemoized(() => GlobalKey<ScaffoldState>(), []);
+    final chatKey = useMemoized(() => GlobalKey<DashChatState>(), []);
+
     return Scaffold(
-      key: _key,
+      key: scaffoldKey,
       // FIXME: 戻るボタンを押した時にエラーが発生する（メモリリーク）
       appBar: AppBar(
         toolbarHeight: 50,
-        title: Text(club?.name ?? ''),
+        title: Text(
+          club?.name ?? '',
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
         leading: Builder(
           builder: (BuildContext context) => IconButton(
             icon: const Icon(Icons.arrow_back_ios),
@@ -71,7 +76,7 @@ class ChatScreen extends HookWidget{
                 if(item == MenuItems.report){
                   final result = await ReportDialog.showClubReport(context, club);
                   if(result ?? false){
-                    ShowSnackBar.show(_key.currentState, '通報を完了しました');
+                    ShowSnackBar.show(scaffoldKey.currentState, '通報を完了しました');
                   }
                 }
               },
@@ -90,7 +95,7 @@ class ChatScreen extends HookWidget{
           error: (_, __) => const Center(child: Text('error')),
           data: (messages){
             return DashChat(
-              key: _chatViewKey,
+              key: chatKey,
               onSend: (message) => _send(context, message),
               textInputAction: TextInputAction.send,
               user: user,
@@ -119,9 +124,9 @@ class ChatScreen extends HookWidget{
                   )
                 );
                 Timer(const Duration(milliseconds: 300), () {
-                  _chatViewKey.currentState.scrollController
+                  chatKey.currentState.scrollController
                     .animateTo(
-                      _chatViewKey.currentState.scrollController.position
+                      chatKey.currentState.scrollController.position
                           .maxScrollExtent,
                       curve: Curves.easeOut,
                       duration: const Duration(milliseconds: 300),

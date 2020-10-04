@@ -49,7 +49,7 @@ class EventResultPage extends HookWidget{
             ),
             children: [
               TextSpan(
-                text: '${bookmarks.length ?? ' '}',
+                text: '${schedules?.length ?? ' '}',
                 style: Theme.of(context).textTheme.subtitle1.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kyodai_board/model/enums/place.dart';
+import 'package:kyodai_board/model/enums/univ_grade.dart';
 import 'package:kyodai_board/model/event.dart';
 import 'package:kyodai_board/model/event_bookmark.dart';
 import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
+import 'package:kyodai_board/view/components/atom/badge.dart';
+import 'package:kyodai_board/model/enums/apply_method.dart';
 
 class EventCard extends HookWidget{
   const EventCard({
@@ -93,18 +97,17 @@ class EventCard extends HookWidget{
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Row(
+                        Wrap(
+                          spacing: 8,
                           children: [
-                            Container(
-                              color: Colors.cyan,
-                              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                              child: Text(
-                                '初心者歓迎',
-                                style: Theme.of(context).textTheme.caption.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            )
+                            if(event != null)
+                              Badge.clubType(event.club.clubType),
+                            if((event?.qualifiedGrades?.contains(UnivGrade.first) ?? false) && event?.qualifiedGrades?.length == 1)
+                              const Badge.freshman(),
+                            if(event?.applyMethods?.needApply ?? false)
+                              const Badge.needApply(),
+                            if(event?.meetingPlace == Place.online)
+                              const Badge.online(),
                           ],
                         ),
                         const SizedBox(height: 8),

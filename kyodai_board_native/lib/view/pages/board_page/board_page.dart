@@ -2,6 +2,7 @@ import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kyodai_board/firebase/analytics.dart';
 import 'package:kyodai_board/model/value_objects/query/event_query.dart';
 import 'package:kyodai_board/model/event_bookmark.dart';
 import 'package:kyodai_board/repo/board_repo.dart';
@@ -28,10 +29,10 @@ class BoardPage extends HookWidget{
     });
 
     final scheduleRepo = useProvider(scheduleProvider);
-    final schedules = scheduleRepo.state;
+    final schedules = useProvider(scheduleProvider.state);
 
     useEffect((){
-      scheduleRepo.fetch();
+      scheduleRepo.fetchIfEmpty();
       return null;
     }, []);
 
@@ -44,6 +45,7 @@ class BoardPage extends HookWidget{
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 50,
+          automaticallyImplyLeading: false,
           bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
             indicator: BubbleTabIndicator(
@@ -72,25 +74,23 @@ class BoardPage extends HookWidget{
             ],
           ),
         ),
-        floatingActionButton: tabState.value != TabState.event
-          ? null :
-          FloatingActionButton.extended(
-            icon: const Icon(Icons.search),
-            label: tabState.value == TabState.event ? const Text('イベント') : const Text('タイムライン'),
-            onPressed: () async {
-              final query = await Navigator.of(context).pushNamed(Routes.boardsSearch, arguments: EventQuery());
-              if(query != null){
-                await Future<void>.delayed(const Duration(milliseconds: 100));
-                await Navigator.of(context).pushNamed(Routes.boardsResult, arguments: query);
-              }
-            },
-          ),
+        floatingActionButton: FloatingActionButton.extended(
+          icon: const Icon(Icons.search),
+          label: const Text('イベント'),
+          onPressed: () async {
+            final query = await Navigator.of(context).pushNamed(Routes.boardsSearch, arguments: EventQuery());
+            if(query != null){
+              await Future<void>.delayed(const Duration(milliseconds: 100));
+              await Navigator.of(context).pushNamed(Routes.boardsResult, arguments: query);
+            }
+          },
+        ),
         body: TabBarView(
           controller: tab,
           children: [
             Center(
               child: RefreshIndicator(
-                onRefresh: () async => scheduleRepo.fetch(),
+                onRefresh: scheduleRepo.fetch,
                 child: schedules.isEmpty
                     ? const Center(child: Text('該当するイベントはありませんでした'))
                     : ListView.builder(

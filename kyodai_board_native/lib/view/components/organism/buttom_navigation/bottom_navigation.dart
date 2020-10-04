@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kyodai_board/router/routes.dart';
 
-
 final routes = {
   // const BottomNavigationBarItem(icon: Icon(Icons.face), title: Text('マイページ')): Routes.mypage,
   const BottomNavigationBarItem(icon: Icon(Icons.palette), title: Text('団体')): Routes.clubs,
@@ -29,9 +28,9 @@ class BottomNavigation extends HookWidget {
         elevation: 4,
         items: items,
         currentIndex: pageIndex.state,
-        onTap: (index){
+        onTap: (index) async {
           pageIndex.state = index;
-          Navigator.of(context).pushNamedAndRemoveUntil(routes[items[index]], (_) => false);
+          await Navigator.of(context).pushReplacementNamed(routes[items[index]]);
         },
         type: BottomNavigationBarType.fixed,
       ),

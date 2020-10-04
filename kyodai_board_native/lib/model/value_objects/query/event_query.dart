@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:kyodai_board/model/enums/club_type.dart';
 import 'package:kyodai_board/model/enums/day_of_week.dart';
+import 'package:kyodai_board/model/enums/place.dart';
 
 enum EventDateChoice{
   all,
-  today, tomorrow, theDayAfterTomorrow, third, fourth,
-  // fifth, sixth, seventh,
+  today, tomorrow, theDayAfterTomorrow,
+  // third, fourth, fifth, sixth, seventh,
   thisWeek,
   // afterThisWeek,
   thisMonth,
@@ -13,17 +14,17 @@ enum EventDateChoice{
 
 Map<EventDateChoice, String> _map = {
   EventDateChoice.all: '全期間',
-  EventDateChoice.today: '今日',
-  EventDateChoice.tomorrow: '明日',
-  EventDateChoice.theDayAfterTomorrow: '明後日',
-  EventDateChoice.third: '${DateTime.now().add(const Duration(days: 3)).day}日',
-  EventDateChoice.fourth: '${DateTime.now().add(const Duration(days: 4)).day}日',
+  EventDateChoice.today: 'きょう',
+  EventDateChoice.tomorrow: 'あした',
+  EventDateChoice.theDayAfterTomorrow: 'あさって',
+  // EventDateChoice.third: '${DateTime.now().add(const Duration(days: 3)).day}日',
+  // EventDateChoice.fourth: '${DateTime.now().add(const Duration(days: 4)).day}日',
   // EventDateChoice.fifth: '${DateTime.now().add(const Duration(days: 5)).day}日',
   // EventDateChoice.sixth: '${DateTime.now().add(const Duration(days: 6)).day}日',
   // EventDateChoice.seventh: '${DateTime.now().add(const Duration(days: 7)).day}日',
-  EventDateChoice.thisWeek: '1週間',
+  EventDateChoice.thisWeek: '今週',
   // EventDateChoice.afterThisWeek: '来週以降',
-  EventDateChoice.thisMonth: '1か月',
+  EventDateChoice.thisMonth: '今月',
 };
 
 extension StringEventDateChoice on EventDateChoice{
@@ -52,30 +53,29 @@ class EventQuery extends ChangeNotifier{
   // Constructors
   EventQuery()
     : _dateChoice = EventDateChoice.all
-    , _clubTypes = { for(final e in ClubType.values) e: false }
-        ..update(ClubType.values[0], (_) => true)
-    , _daysOfWeek = { for(final e in DayOfWeek.values) e: true }
-    , _times = { for(final e in EventTime.values) e: true };
+    , _clubTypes = { for(final e in ClubType.values) e: true }
+    , _times = { for(final e in EventTime.values) e: true }
+    , _places = { for(final e in Place.values) e: true };
 
   EventQuery._from(
     EventDateChoice dateChoices,
     Map<ClubType, bool> clubTypes,
-    Map<DayOfWeek, bool> daysOfWeek,
     Map<EventTime, bool> times,
+    Map<Place, bool> places,
   )
     : _dateChoice = dateChoices
     , _clubTypes = clubTypes
-    , _daysOfWeek = daysOfWeek
-    , _times = times;
+    , _times = times
+    , _places = places;
 
   EventQuery copyWith({
     EventDateChoice dateChoices,
     Map<ClubType, bool> clubTypes,
-    Map<DayOfWeek, bool> daysOfWeek,
     Map<EventTime, bool> times,
+    Map<Place, bool> places,
   }){
     return EventQuery._from(
-      _dateChoice ?? dateChoices, clubTypes ?? _clubTypes, daysOfWeek ?? _daysOfWeek, times ?? _times);
+      _dateChoice ?? dateChoices, clubTypes ?? _clubTypes, times ?? _times, places ?? _places);
   }
 
   // internal values
@@ -86,21 +86,21 @@ class EventQuery extends ChangeNotifier{
     notifyListeners();
   }
   final Map<ClubType, bool> _clubTypes;
-  final Map<DayOfWeek, bool> _daysOfWeek;
-  final Map<EventTime, bool> _times;
   Map<ClubType, bool> get clubTypes => _clubTypes;
-  Map<DayOfWeek, bool> get daysOfWeek => _daysOfWeek;
+  final Map<EventTime, bool> _times;
   Map<EventTime, bool> get times => _times;
+  final Map<Place, bool> _places;
+  Map<Place, bool> get places => _places;
   
   bool isSelected<T>(T item){
     if(T == EventDateChoice){
       return _dateChoice == item;
     }else if(T == ClubType){
       return _clubTypes.cast<T, bool>()[item];
-    }else if(T == DayOfWeek){
-      return _daysOfWeek.cast<T, bool>()[item];
     }else if(T == EventTime){
       return _times.cast<T, bool>()[item];
+    }else if(T == Place){
+      return _places.cast<T, bool>()[item];
     }
     throw UnimplementedError();
   }
@@ -109,10 +109,10 @@ class EventQuery extends ChangeNotifier{
     Map<T, bool> map;
     if(T == ClubType){
       map = _clubTypes.cast<T, bool>();
-    }else if(T == DayOfWeek){
-      map = _daysOfWeek.cast<T, bool>();
     }else if(T == EventTime){
       map = _times.cast<T, bool>();
+    }else if(T == Place){
+      map = _places.cast<T, bool>();
     }else{
       throw UnimplementedError();
     }
@@ -129,10 +129,10 @@ class EventQuery extends ChangeNotifier{
     Map<T, bool> map;
     if(T == ClubType){
       map = _clubTypes.cast<T, bool>();
-    }else if(T == DayOfWeek){
-      map = _daysOfWeek.cast<T, bool>();
     }else if(T == EventTime){
       map = _times.cast<T, bool>();
+    }else if(T == Place){
+      map = _places.cast<T, bool>();
     }else{
       throw UnimplementedError();
     }
