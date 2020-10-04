@@ -13,6 +13,7 @@ abstract class EventBase{
     @required this.clubRef,
     @required this.title,
     @required this.description,
+    @required this.descriptionUrl,
     @required this.imageUrl,
     @required this.place_display,
     @required this.meetingPlace,
@@ -31,11 +32,13 @@ abstract class EventBase{
     @required this.apply_display,
   });
 
+  // 画像もつけれると嬉しい
   EventBase.fromMap(Map<String, dynamic> map)
     : club = Club.fromMap((map['clubRef'] as DocumentReference).id, map['club'] as Map<String, dynamic>)
     , clubRef = map['clubRef'] as DocumentReference
     , title = map.getString('title')
     , description = map.getString('description')
+    , descriptionUrl = map.getString('descriptionUrl', or: null)
     , imageUrl = map.getString('imageUrl')
     , place_display = map.getString('place_display')
     , meetingPlace = map.getPlace('meetingPlace')
@@ -63,6 +66,8 @@ abstract class EventBase{
   final String title;
   // イベントの説明
   final String description;
+  // 説明URL
+  final String descriptionUrl;
   // 画像URL
   final String imageUrl;
   // 開催場所
@@ -110,6 +115,7 @@ class Schedule extends EventBase{
     this.applyTime_display,
     String title,
     String description,
+    String descriptionUrl,
     String imageUrl,
     String place_display,
     Place meetingPlace,
@@ -126,8 +132,8 @@ class Schedule extends EventBase{
     String qualifiedGrades_display,
     List<ApplyMethod> applyMethods,
     String apply_display,
-  }): super(club: club, clubRef: clubRef, title: title, description: description, imageUrl: imageUrl,
-        place_display: place_display, meetingPlace: meetingPlace, meetingPlace_display: meetingPlace_display,
+  }): super(club: club, clubRef: clubRef, title: title, description: description, descriptionUrl: descriptionUrl,
+        imageUrl: imageUrl, place_display: place_display, meetingPlace: meetingPlace, meetingPlace_display: meetingPlace_display,
         weatherCancel: weatherCancel, weatherCancel_display: weatherCancel_display, contact: contact,
         contactCurrentDay: contactCurrentDay, belongings: belongings, notes: notes, infectionNotes: infectionNotes,
         hasGradesLimit: hasGradesLimit, qualifiedGrades: qualifiedGrades,
@@ -162,6 +168,7 @@ class Event extends EventBase{
     DocumentReference clubRef,
     String title,
     String description,
+    String descriptionUrl,
     String imageUrl,
     String place_display,
     Place meetingPlace,
@@ -179,8 +186,8 @@ class Event extends EventBase{
     List<ApplyMethod> applyMethods,
     String apply_display,
     this.schedules,
-  }): super(club: club, clubRef: clubRef, title: title, description: description, imageUrl: imageUrl,
-        place_display: place_display, meetingPlace: meetingPlace, meetingPlace_display: meetingPlace_display,
+  }): super(club: club, clubRef: clubRef, title: title, description: description, descriptionUrl: descriptionUrl,
+        imageUrl: imageUrl, place_display: place_display, meetingPlace: meetingPlace, meetingPlace_display: meetingPlace_display,
         weatherCancel: weatherCancel, weatherCancel_display: weatherCancel_display, contact: contact,
         contactCurrentDay: contactCurrentDay, belongings: belongings, notes: notes, infectionNotes: infectionNotes,
         hasGradesLimit: hasGradesLimit, qualifiedGrades: qualifiedGrades,

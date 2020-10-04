@@ -147,8 +147,8 @@ final clubProvider = StateNotifierProvider.autoDispose.family(
 // GET: Clubを取得
 // hooks
 AsyncSnapshot<Club> useClub(String clubId){
-  final future = useState(getClub(clubId));
-  return useFuture<Club>(future.value);
+  // final future = useState(getClub(clubId));
+  return useFuture<Club>(useMemoized(() => getClub(clubId), []));
 }
 // async function
 Future<Club> getClub(String clubId) async {

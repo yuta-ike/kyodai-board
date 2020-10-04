@@ -24,7 +24,13 @@ class ChatPage extends HookWidget{
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        title: const Text('チャットルーム一覧'),
+        title: Text(
+          'チャットルーム一覧',
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
         automaticallyImplyLeading: false,
       ),
       bottomNavigationBar: BottomNavigation(),
@@ -47,51 +53,54 @@ class ChatPage extends HookWidget{
                 }else{
                   return ListView.separated(
                     itemCount: chatrooms.length,
-                    separatorBuilder: (context, index) => const Divider(),
+                    separatorBuilder: (context, index) => const Divider(height: 1, thickness: 1),
                     itemBuilder: (context, index) {
                       final chatroom = chatrooms[index];
                       return InkWell(
                         onTap: () => _moveToChatroom(Navigator.of(context), chatroom),
-                        child: Row(
-                          children: [
-                            AsyncImage(
-                              imageUrl: chatroom.club.iconImageUrl,
-                              imageBuilder: (context, image) => Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: CircleAvatar(
-                                  backgroundImage: image,
-                                  backgroundColor: Colors.transparent,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              AsyncImage(
+                                imageUrl: chatroom.club.iconImageUrl,
+                                imageBuilder: (context, image) => Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: CircleAvatar(
+                                    backgroundImage: image,
+                                    backgroundColor: Colors.transparent,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: Text(chatroom.club.name),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    chatroom.updatedAt.approximatelyFormat(), //TODO: ちゃんとする
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  if(chatroom.hasUnreadForStudent)
-                                    Badge(
-                                      elevation: 0,
-                                      padding: const EdgeInsets.all(5),
-                                      badgeContent: Container(
-                                        height: 5,
-                                        width: 5,
-                                        decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                              Expanded(
+                                child: Text(chatroom.club.name),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      chatroom.updatedAt.approximatelyFormat(), //TODO: ちゃんとする
+                                      style: const TextStyle(
+                                        fontSize: 12,
                                       ),
                                     ),
-                                ]
+                                    const SizedBox(height: 4),
+                                    if(chatroom.hasUnreadForStudent)
+                                      Badge(
+                                        elevation: 0,
+                                        padding: const EdgeInsets.all(5),
+                                        badgeContent: Container(
+                                          height: 5,
+                                          width: 5,
+                                          decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                                        ),
+                                      ),
+                                  ]
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },

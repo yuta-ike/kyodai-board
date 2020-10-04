@@ -10,6 +10,7 @@ import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
 import 'package:kyodai_board/utils/date_extension.dart';
 import 'package:kyodai_board/view/components/atom/badge.dart';
+import 'package:kyodai_board/view/components/organism/ogp/ogp.dart';
 import 'package:kyodai_board/view/mixins/club_report_dialog.dart';
 import 'package:kyodai_board/view/mixins/show_snackbar.dart';
 import 'package:kyodai_board/view/screens/club_screen.dart';
@@ -48,15 +49,13 @@ class EventScreen extends HookWidget{
                   '応募方法',
                   schedule.applyMethods.where((element) => element != ApplyMethod.none).map((e) => e.format).toList()
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(schedule.apply_display)
-                ),
+                if(schedule.apply_display.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(schedule.apply_display)
+                  ),
               ],
               
-              if(!schedule.applyMethods.needApply)
-                _buildInfo(context, '応募方法', '応募は不要です'),
-
               const Divider(),
               _buildInfo(context, '持ち物', schedule.belongings),
               const Divider(),
@@ -72,6 +71,7 @@ class EventScreen extends HookWidget{
               const Divider(),
               _buildInfo(context, '当日連絡先', schedule.contactCurrentDay),
               const Divider(),
+              _buildInfo(context, '感染症対策', schedule.infectionNotes),
 
               if(schedule.applyMethods.appApply)
                 Row(
@@ -178,7 +178,7 @@ class EventScreen extends HookWidget{
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   InkWell(
-                    onTap: () => Navigator.of(context).push(
+                    onTap: event == null ? null : () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => ClubScreen(clubId: event.clubId)
                       )
@@ -263,11 +263,15 @@ class EventScreen extends HookWidget{
 
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                event?.description ?? schedule?.description ?? '',
-                style: Theme.of(context).textTheme.bodyText2.copyWith(
-                  fontSize: 13
-                ),
+              child: Column(
+                children: [
+                  Text(
+                    event?.description ?? schedule?.description ?? '',
+                    style: Theme.of(context).textTheme.bodyText2.copyWith(
+                      fontSize: 13
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -335,7 +339,7 @@ class EventScreen extends HookWidget{
                   
                   if(event != null)
                     Container(
-                      constraints: showAllSchedule.value ? const BoxConstraints(maxHeight: 300) : null,
+                      constraints: showAllSchedule.value ? null : const BoxConstraints(maxHeight: 300),
                       child: event.schedules?.isEmpty ?? false
                         ? Center(
                             child: Container(
@@ -354,28 +358,28 @@ class EventScreen extends HookWidget{
                                 ),
                               )
                             ),
-                        )
+                          )
                         : ListView.separated(
-                          physics: showAllSchedule.value ? null : const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.only(top: 0),
-                          itemCount: event.schedules?.length ?? 0,
-                          separatorBuilder: (context, index) => const Divider(thickness: 0, height: 0,),
-                          itemBuilder: (context, index){
-                            return ScheduleListItem(event.schedules[index], () => _apply(context, event.schedules[index]));
-                          }
-                        ),
+                            physics: showAllSchedule.value || (event.schedules?.length ?? 0) <= 2 ? const NeverScrollableScrollPhysics() : null,
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.only(top: 0),
+                            itemCount: event.schedules?.length ?? 0,
+                            separatorBuilder: (context, index) => const Divider(thickness: 0, height: 0,),
+                            itemBuilder: (context, index){
+                              return ScheduleListItem(event.schedules[index], () => _apply(context, event.schedules[index]));
+                            }
+                          ),
                     ),
                   
                   const SizedBox(height: 8),
                   
-                  if(event?.schedules?.isNotEmpty ?? false)
-                  Center(
-                    child: FlatButton(
-                      onPressed: () => showAllSchedule.value = !showAllSchedule.value,
-                      child: Text(showAllSchedule.value ? '全ての日程を見る' : '日程を折りたたむ'),
+                  if((event?.schedules?.length ?? 0) > 2)
+                    Center(
+                      child: FlatButton(
+                        onPressed: () => showAllSchedule.value = !showAllSchedule.value,
+                        child: Text(showAllSchedule.value ? '全ての日程を見る' : '日程を折りたたむ'),
+                      ),
                     ),
-                  ),
                 ]
               )
             ),
@@ -393,15 +397,9 @@ class EventScreen extends HookWidget{
                 : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '情報',
-                      style: Theme.of(context).textTheme.subtitle1.copyWith(
-                        fontSize: 16,
-                      ),
-                    ),
                     const SizedBox(height: 4),
                     Text(
-                      '＊参加回によって異なる場合があります。詳しくは上記「イベント日程」からご確認ください。',
+                      '＊以下の情報は、参加日程によって異なる場合があります。詳しくは上記「イベント日程」からご確認ください。',
                       style: Theme.of(context).textTheme.caption.copyWith(
                         color: Theme.of(context).errorColor,
                       ),
@@ -413,38 +411,37 @@ class EventScreen extends HookWidget{
                       ),
                       child: Column(
                         children: [
-                            const Divider(),
                           if(event.belongings.isNotEmpty) ...[
-                            _buildInfo(context, '持ち物', event.belongings),
                             const Divider(),
+                            _buildInfo(context, '持ち物', event.belongings),
                           ],
                           if(event.place_display.isNotEmpty) ...[
-                            _buildInfo(context, '集合場所', event.place_display),
                             const Divider(),
+                            _buildInfo(context, '集合場所', event.place_display),
                           ],
                           if(event.meetingPlace_display.isNotEmpty) ...[
-                            _buildInfo(context, '実施場所', event.meetingPlace_display),
                             const Divider(),
+                            _buildInfo(context, '実施場所', event.meetingPlace_display),
                           ],
                           if(event.weatherCancel_display.isNotEmpty) ...[
-                            _buildInfo(context, '雨天時', event.weatherCancel_display),
                             const Divider(),
+                            _buildInfo(context, '雨天時', event.weatherCancel_display),
                           ],
                           if(event.notes.isNotEmpty) ...[
-                            _buildInfo(context, '注意事項', event.notes),
                             const Divider(),
+                            _buildInfo(context, '注意事項', event.notes),
                           ],
                           if(event.contact.isNotEmpty) ...[
-                            _buildInfo(context, '連絡先', event.contact),
                             const Divider(),
+                            _buildInfo(context, '連絡先', event.contact),
                           ],
                           if(event.contactCurrentDay.isNotEmpty) ...[
-                            _buildInfo(context, '当日連絡先', event.contactCurrentDay),
                             const Divider(),
+                            _buildInfo(context, '当日連絡先', event.contactCurrentDay),
                           ],
                           if(event.infectionNotes.isNotEmpty) ...[
-                            _buildInfo(context, '感染症対策', event.infectionNotes),
                             const Divider(),
+                            _buildInfo(context, '感染症対策', event.infectionNotes),
                           ]
                         ],
                       ),
@@ -453,35 +450,35 @@ class EventScreen extends HookWidget{
                 ),
               ),
 
-            Divider(
-              thickness: 16,
-              height: 32,
-              color: Colors.grey[200],
-            ),
+            // Divider(
+            //   thickness: 16,
+            //   height: 32,
+            //   color: Colors.grey[200],
+            // ),
 
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'SNS',
-                    style: Theme.of(context).textTheme.subtitle1,
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: 300,
-                    child: SingleChildScrollView(
-                      child: SocialEmbed(
-                        embedCode: tweetContent,
-                        type: SocailMediaPlatforms.twitter,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   padding: const EdgeInsets.symmetric(horizontal: 16),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       Text(
+            //         'SNS',
+            //         style: Theme.of(context).textTheme.subtitle1,
+            //       ),
+            //       const SizedBox(height: 8),
+            //       SizedBox(
+            //         width: MediaQuery.of(context).size.width,
+            //         height: 300,
+            //         child: SingleChildScrollView(
+            //           child: SocialEmbed(
+            //             embedCode: tweetContent,
+            //             type: SocailMediaPlatforms.twitter,
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             
             Divider(
               thickness: 16,

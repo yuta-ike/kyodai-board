@@ -81,9 +81,11 @@ class ClubScreen extends HookWidget{
     final scaffoldKey = useState(GlobalKey<ScaffoldState>());
 
     useEffect((){
-      analytics.logViewItem(itemId: club.id, itemName: club.name, itemCategory: 'club_page_open');
+      if(club != null){
+        analytics.logViewItem(itemId: club.id, itemName: club.name, itemCategory: 'club_page_open');
+      }
       return null;
-    }, []);
+    }, [club != null]);
 
     return Scaffold(
       key: scaffoldKey.value,
@@ -176,7 +178,7 @@ class ClubScreen extends HookWidget{
                                   loading: () => const InkWell(child: Icon(Icons.bookmark)),
                                   error: (dynamic _, __) => const InkWell(child: Icon(Icons.bookmark)),
                                   data: (data) => InkWell(
-                                    onTap: () => () => bookmarks.data.value.containsClubId(club.id)
+                                    onTap: () => bookmarks.data.value.containsClubId(club.id)
                                         ? unbookmarkClub(bookmarks.data.value.getWithClubId(club.id))
                                         : bookmarkClub(club.id),
                                     child: Padding(
@@ -299,7 +301,9 @@ class ClubScreen extends HookWidget{
                     ),
                   ),
                   Container(
-                    child: ListView(
+                    child: events.isEmpty
+                    ? const Center(child: Text('登録されているイベントはありません\n'))
+                    : ListView(
                       padding: EdgeInsets.zero,
                       // FIXME EventCardを流用しない
                       children: [

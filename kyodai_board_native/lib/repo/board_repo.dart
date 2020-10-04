@@ -144,8 +144,7 @@ class EventListRepository extends StateNotifier<List<Event>>{
   EventListRepository(): super([]);
 
   Future<void> forceFetch(String clubId) async {
-    //TODO: clubIdをEventに、createdAtを全レコードに追加する
-    final snapshots = await fsinstance.collectionGroup('events').where('clubId', isEqualTo: clubId)/*.orderBy('createdAt')*/.get();
+    final snapshots = await fsinstance.collection('clubs').doc(clubId).collection('events').orderBy('updatedAt').get();
     state = snapshots.docs.map((snapshot) => Event.fromMap(snapshot.id, snapshot.data(), null)).toList();
   }
 
