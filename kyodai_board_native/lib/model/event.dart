@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/model/enums/apply_method.dart';
-import 'package:kyodai_board/model/enums/campus.dart';
+import 'package:kyodai_board/model/enums/place.dart';
 import 'package:kyodai_board/model/enums/weather_cancel.dart';
 import 'package:kyodai_board/model/enums/univ_grade.dart';
 import 'package:kyodai_board/utils/dynamic_cast_map.dart';
@@ -15,7 +15,7 @@ abstract class EventBase{
     @required this.description,
     @required this.imageUrl,
     @required this.place_display,
-    @required this.campus,
+    @required this.meetingPlace,
     @required this.meetingPlace_display,
     @required this.weatherCancel,
     @required this.weatherCancel_display,
@@ -23,6 +23,7 @@ abstract class EventBase{
     @required this.contactCurrentDay,
     @required this.belongings,
     @required this.notes,
+    @required this.infectionNotes,
     @required this.hasGradesLimit,
     @required this.qualifiedGrades,
     @required this.qualifiedGrades_display,
@@ -37,7 +38,7 @@ abstract class EventBase{
     , description = map.getString('description')
     , imageUrl = map.getString('imageUrl')
     , place_display = map.getString('place_display')
-    , campus = map.getCampus('campus')
+    , meetingPlace = map.getPlace('meetingPlace')
     , meetingPlace_display = map.getString('meetingPlace_display')
     , weatherCancel = map.getWeatherCancel('weatherCancel')
     , weatherCancel_display = map.getString('weatherCancel_display')
@@ -48,6 +49,7 @@ abstract class EventBase{
     , qualifiedGrades_display = map.getString('qualifiedGrades_display')
     , belongings = map.getString('belongings')
     , notes = map.getString('notes')
+    , infectionNotes = map.getString('infectionNotes')
     , applyMethods = map.getApplyMethods('applyMethods')
     , apply_display = map.getString('apply_display');
   
@@ -65,7 +67,7 @@ abstract class EventBase{
   final String imageUrl;
   // 開催場所
   final String place_display;
-  final Campus campus;
+  final Place meetingPlace;
   // 集合場所
   final String meetingPlace_display;
   // 雨天時の対応
@@ -75,6 +77,7 @@ abstract class EventBase{
   final String contact;
   // 当日連絡先
   final String contactCurrentDay;
+
   
   // 参加可能学年
   final bool hasGradesLimit;
@@ -85,6 +88,8 @@ abstract class EventBase{
   final String belongings;
   // 注意事項
   final String notes;
+  // 感染症対策
+  final String infectionNotes;
   // 応募方法
   final List<ApplyMethod> applyMethods;
   // 応募について
@@ -107,7 +112,7 @@ class Schedule extends EventBase{
     String description,
     String imageUrl,
     String place_display,
-    Campus campus,
+    Place meetingPlace,
     String meetingPlace_display,
     WeatherCancel weatherCancel,
     String weatherCancel_display,
@@ -115,15 +120,17 @@ class Schedule extends EventBase{
     String contactCurrentDay,
     String belongings,
     String notes,
+    String infectionNotes,
     bool hasGradesLimit,
     List<UnivGrade> qualifiedGrades,
     String qualifiedGrades_display,
     List<ApplyMethod> applyMethods,
     String apply_display,
   }): super(club: club, clubRef: clubRef, title: title, description: description, imageUrl: imageUrl,
-        place_display: place_display, campus: campus, meetingPlace_display: meetingPlace_display, weatherCancel: weatherCancel,
-        weatherCancel_display: weatherCancel_display, contact: contact, contactCurrentDay: contactCurrentDay,
-        belongings: belongings, notes: notes, hasGradesLimit: hasGradesLimit, qualifiedGrades: qualifiedGrades,
+        place_display: place_display, meetingPlace: meetingPlace, meetingPlace_display: meetingPlace_display,
+        weatherCancel: weatherCancel, weatherCancel_display: weatherCancel_display, contact: contact,
+        contactCurrentDay: contactCurrentDay, belongings: belongings, notes: notes, infectionNotes: infectionNotes,
+        hasGradesLimit: hasGradesLimit, qualifiedGrades: qualifiedGrades,
         qualifiedGrades_display: qualifiedGrades_display, applyMethods: applyMethods, apply_display: apply_display
       );
   
@@ -157,7 +164,7 @@ class Event extends EventBase{
     String description,
     String imageUrl,
     String place_display,
-    Campus campus,
+    Place meetingPlace,
     String meetingPlace_display,
     WeatherCancel weatherCancel,
     String weatherCancel_display,
@@ -165,6 +172,7 @@ class Event extends EventBase{
     String contactCurrentDay,
     String belongings,
     String notes,
+    String infectionNotes,
     bool hasGradesLimit,
     List<UnivGrade> qualifiedGrades,
     String qualifiedGrades_display,
@@ -172,9 +180,10 @@ class Event extends EventBase{
     String apply_display,
     this.schedules,
   }): super(club: club, clubRef: clubRef, title: title, description: description, imageUrl: imageUrl,
-        place_display: place_display, campus: campus, meetingPlace_display: meetingPlace_display, weatherCancel: weatherCancel,
-        weatherCancel_display: weatherCancel_display, contact: contact, contactCurrentDay: contactCurrentDay,
-        belongings: belongings, notes: notes, hasGradesLimit: hasGradesLimit, qualifiedGrades: qualifiedGrades,
+        place_display: place_display, meetingPlace: meetingPlace, meetingPlace_display: meetingPlace_display,
+        weatherCancel: weatherCancel, weatherCancel_display: weatherCancel_display, contact: contact,
+        contactCurrentDay: contactCurrentDay, belongings: belongings, notes: notes, infectionNotes: infectionNotes,
+        hasGradesLimit: hasGradesLimit, qualifiedGrades: qualifiedGrades,
         qualifiedGrades_display: qualifiedGrades_display, applyMethods: applyMethods, apply_display: apply_display
       );
 

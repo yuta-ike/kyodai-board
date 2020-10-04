@@ -4,17 +4,24 @@ import 'package:kyodai_board/interactor/auth_interactor.dart';
 import 'package:kyodai_board/router/routes.dart';
 
 class TopPage extends HookWidget{
-  Future<void> _loginAnonymously(NavigatorState navigator) async {
-    await signInAnonymously();
-    await navigator.pushNamedAndRemoveUntil(Routes.mypage, (_) => false);
-  }
-
-  Future<void> _moveToLoginPage(NavigatorState navigator) async {
-    await navigator.pushNamed(Routes.login);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isLoading = useState(false);
+
+    Future<void> _loginAnonymously(NavigatorState navigator) async {
+      isLoading.value = true;
+      try{
+        await signInAnonymously();
+        await navigator.pushNamedAndRemoveUntil(Routes.mypage, (_) => false);
+      }finally{
+        isLoading.value = false;
+      }
+    }
+
+    Future<void> _moveToLoginPage(NavigatorState navigator) async {
+      await navigator.pushNamed(Routes.login);
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -52,7 +59,7 @@ class TopPage extends HookWidget{
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: OutlineButton(
                           child: const Text('いますぐ利用を開始'),
-                          onPressed: () => _loginAnonymously(Navigator.of(context)),
+                          onPressed: isLoading.value ? null : () => _loginAnonymously(Navigator.of(context)),
                           borderSide: const BorderSide(
                             color: Colors.black
                           ),
@@ -90,7 +97,7 @@ class TopPage extends HookWidget{
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: OutlineButton(
                           child: const Text('ログイン'),
-                          onPressed: () => _moveToLoginPage(Navigator.of(context)),
+                          onPressed: isLoading.value ? null : () => _moveToLoginPage(Navigator.of(context)),
                           borderSide: const BorderSide(
                             color: Colors.black
                           ),

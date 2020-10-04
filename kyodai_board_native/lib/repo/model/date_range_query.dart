@@ -45,13 +45,13 @@ extension RangeEventDateChoice on EventDateChoice{
       return DatePeriod(now, today.add(const Duration(days: 7)));
     }
 
-    if(this == EventDateChoice.fourth){
-      return DatePeriod(today.add(const Duration(days: 4)), today.add(const Duration(days: 5)));
-    }
+    // if(this == EventDateChoice.fourth){
+    //   return DatePeriod(today.add(const Duration(days: 4)), today.add(const Duration(days: 5)));
+    // }
 
-    if(this == EventDateChoice.third){
-      return DatePeriod(today.add(const Duration(days: 3)), today.add(const Duration(days: 4)));
-    }
+    // if(this == EventDateChoice.third){
+    //   return DatePeriod(today.add(const Duration(days: 3)), today.add(const Duration(days: 4)));
+    // }
 
     if(this == EventDateChoice.theDayAfterTomorrow){
       return DatePeriod(today.add(const Duration(days: 2)), today.add(const Duration(days: 3)));

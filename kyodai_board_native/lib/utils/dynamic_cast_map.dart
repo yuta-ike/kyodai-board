@@ -10,7 +10,7 @@ extension DynamicCastMap on Map<String, dynamic>{
     }
   }
 
-  String getString(String key, { String or }) => get<String>(key, or: or);
+  String getString(String key, { String or = ''}) => get<String>(key, or: or);
   int getInt(String key, { int or }) => get<int>(key, or: or);
   double getDouble(String key, { double or }) => get<double>(key, or: or) ?? getInt(key)?.toDouble() ?? or;
   bool getBool(String key, { bool or }) => get<bool>(key, or: or);

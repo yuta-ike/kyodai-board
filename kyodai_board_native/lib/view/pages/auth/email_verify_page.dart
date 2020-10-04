@@ -10,7 +10,7 @@ class EmailVerifyPage extends HookWidget{
   }
 
   Future<void> _verify(NavigatorState navigator, String code) async {
-    await verifyCode(code);
+    // await verifyCode(code);
     await navigator.pushNamedAndRemoveUntil(Routes.mypage, (_) => false);
   }
 

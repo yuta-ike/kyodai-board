@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/organism/buttom_navigation/bottom_navigation.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingPage extends HookWidget{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
+        automaticallyImplyLeading: false,
         title: Text(
           '設定',
           style: Theme.of(context).textTheme.bodyText1.copyWith(
@@ -34,14 +35,16 @@ class SettingPage extends HookWidget{
           //   onTap: () => Navigator.of(context).pushNamed(Routes.settingsNotify),
           // ),
           // const Divider(height: 0),
-          const ListTile(
-            title: Text('運営からのお知らせ'),
-            trailing: Icon(Icons.chevron_right),
+          ListTile(
+            title: const Text('運営からのお知らせ'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => print('お知らせ'),
           ),
           const Divider(height: 0),
-          const ListTile(
-            title: Text('公式Twitter'),
-            trailing: Icon(Icons.chevron_right),
+          ListTile(
+            title: const Text('公式Twitter'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => launch('https://twitter.com/kyodai_catarog'),
           ),
           const Divider(height: 0),
           const ListTile(

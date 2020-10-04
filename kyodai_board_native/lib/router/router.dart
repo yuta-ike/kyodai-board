@@ -81,7 +81,6 @@ class Router {
           );
       }
     } else {
-
       switch (settings.name) {
         case '/':
           return PageRouteBuilder<void>(
@@ -131,7 +130,7 @@ class Router {
         case '/clubs/search':
           final query = settings.arguments as ClubQuery;
           return MaterialPageRoute<void>(
-            settings: const RouteSettings(name: '/clubs'),
+            settings: const RouteSettings(name: '/clubs/search'),
             builder: (_) => ClubSearchScreen(query: query),
             fullscreenDialog: true,
           );
@@ -139,9 +138,8 @@ class Router {
         case '/clubs/result':
           final query = settings.arguments as ClubQuery;
           return MaterialPageRoute<void>(
-            settings: const RouteSettings(name: '/clubs'),
+            settings: const RouteSettings(name: '/clubs/result'),
             builder: (_) => ClubResultPage(query: query),
-            fullscreenDialog: true,
           );
         
         case '/settings':

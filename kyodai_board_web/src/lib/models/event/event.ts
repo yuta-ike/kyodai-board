@@ -2,9 +2,9 @@ import getRandom, { getRandomImage, getRandomMul } from "../../../utils/getRando
 import { Campus, UnivGrade } from "../club/club";
 import { getApplyMethods, getCampuses, getUnivGrades, getWeatherCancels } from "../utils/enumValues";
 
-
 export type WeatherCancel = 'cancelWhenRain' | 'cancelWhenHardRain' | 'noCancel' | 'others'
 export type ApplyMethod = 'appform' | 'appchat' | 'webpage' | 'googleform' | 'twitter' | 'line' | 'facebook' | 'email' | 'others' | 'noneed'
+export type Place = Campus | 'online'
 
 export default class Event{
 	constructor(
@@ -12,7 +12,7 @@ export default class Event{
 		readonly description: string,
 		readonly imageUrl: string,
 		readonly place_display: string,
-		readonly campus: Campus,
+		readonly meetingPlace: Place,
 		readonly meetingPlace_display: string,
 		readonly weatherCancel: WeatherCancel,
 		readonly weatherCancel_display: string,
@@ -23,6 +23,7 @@ export default class Event{
 		readonly qualifiedGrades_display: string,
 		readonly belongings: string,
 		readonly notes: string,
+		readonly infectionNotes: string,
 		readonly applyMethods: ApplyMethod[],
 		readonly apply_display: string,
 	){}
@@ -33,7 +34,7 @@ export const eventForm: {[P in keyof Event]: [string, string, boolean, Event[P]?
 	description: ["string", "イベントの説明", true, ""],
 	imageUrl: ["string", "画像URL", true, ""],
 	place_display: ["string", "実施場所", true, ""],
-	campus: ["Campus", "実施キャンパス", true, "yoshida"],
+	meetingPlace: ["Campus", "実施キャンパス", true, "yoshida"],
 	meetingPlace_display: ["string", "集合場所", true, ""],
 	weatherCancel: ["WeatherCancel", "雨天時の対応", true, "cancelWhenHardRain"],
 	weatherCancel_display: ["string", "雨天時の対応の説明", true, ""],
@@ -44,6 +45,7 @@ export const eventForm: {[P in keyof Event]: [string, string, boolean, Event[P]?
 	qualifiedGrades_display: ["string", "参加可能な学年の説明", true, ""],
 	belongings: ["string", "持ち物", true, ""],
 	notes: ["string", "注意事項", true, ""],
+	infectionNotes: ["string", "感染症対策", true, ""],
 	applyMethods: ["ApplyMethod", "応募方法", true, getApplyMethods()],
 	apply_display: ["string", "応募方法の説明", true, ""],
 }
@@ -53,7 +55,7 @@ export const eventFormRandom: (() => { [P in keyof Event]: Event[P] }) = () => (
 	description: getRandom(["新入生向けに活動内容を説明します。後半には体験会も行うのでぜひ参加してください。", "サークル体験会を行います！ぜひご参加ください！！", "オンライン新歓です。先輩や同期とワイワイ話しましょう！（入退室自由です）", "履修で困っていることがあればサポートします！お気軽にご参加ください"]),
 	imageUrl: getRandomImage(),
 	place_display: getRandom(["オンライン（Zoom）", "農学部グラウンド", "吉田キャンパス内の教室", "市民体育館"]),
-	campus: getRandom(getCampuses()),
+	meetingPlace: getRandom(getCampuses()),
 	meetingPlace_display: getRandom(["オンライン（Zoom）", "農学部グラウンド", "吉田キャンパス内の教室", "市民体育館"]),
 	weatherCancel: getRandom(getWeatherCancels()),
 	weatherCancel_display: "",
@@ -64,6 +66,7 @@ export const eventFormRandom: (() => { [P in keyof Event]: Event[P] }) = () => (
 	qualifiedGrades_display: "",
 	belongings: getRandom(["運動できる靴と服装・水分","特になし"]),
 	notes: getRandom(["当日飛び入り参加も可能です！", ""]),
+	infectionNotes: getRandom(["密集を防止するため少人数で実施しています", "参加者同士で十分距離を取れる会場を用意しています。"]),
 	applyMethods: getRandomMul(getApplyMethods()),
 	apply_display: "",
 })

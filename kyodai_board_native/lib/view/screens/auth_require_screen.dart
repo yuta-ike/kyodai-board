@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:kyodai_board/interactor/auth_interactor.dart';
+import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/organism/buttom_navigation/bottom_navigation.dart';
 
 class AuthRequireScreen extends HookWidget{
@@ -10,8 +11,14 @@ class AuthRequireScreen extends HookWidget{
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
-        title: const Text('チャット'),
-        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text(
+          'チャット',
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
       ),
       bottomNavigationBar: BottomNavigation(),
       body: Container(
@@ -88,8 +95,9 @@ class AuthRequireScreen extends HookWidget{
                         Buttons.GoogleDark,
                         text: 'Googleでログイン',
                         elevation: 0,
-                        onPressed: () {
-                          signInGoogle();
+                        onPressed: () async {
+                          await signInGoogle();
+                          await Navigator.pushReplacementNamed(context, Routes.chat);
                         },
                       ),
                     ),

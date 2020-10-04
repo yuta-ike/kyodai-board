@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kyodai_board/firebase/analytics.dart';
 import 'package:kyodai_board/model/club.dart';
 import 'package:kyodai_board/repo/board_repo.dart';
 import 'package:kyodai_board/repo/club_repo.dart';
@@ -11,6 +12,7 @@ import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/router/routes.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
 import 'package:kyodai_board/model/club_bookmark.dart';
+import 'package:kyodai_board/view/components/atom/badge.dart';
 import 'package:kyodai_board/view/components/organism/event_card/event_card.dart';
 import 'package:kyodai_board/view/mixins/club_report_dialog.dart';
 import 'package:kyodai_board/view/mixins/show_snackbar.dart';
@@ -42,23 +44,29 @@ class ClubScreen extends HookWidget{
   Widget build(BuildContext context) {
     final scrollRatio = useState<double>(0);
     final scrollController = useScrollController();
-    scrollController.addListener(() {
-      scrollRatio.value = scrollController.hasClients
-          ? math.min(scrollController.offset / scrollController.position.maxScrollExtent, 0.3)
-          : 0;
-    });
+    useEffect((){
+      scrollController.addListener(() {
+        scrollRatio.value = scrollController.hasClients
+            ? math.min(scrollController.offset / scrollController.position.maxScrollExtent, 0.3)
+            : 0;
+      });
+      return null;
+    }, [scrollController]);
 
     final tabController = useTabController(initialLength: 5);
     final tabIndex = useState(0);
-    tabController.addListener(() {
-      tabIndex.value = tabController.index;
-    });
+    useEffect(() {
+      tabController.addListener(() {
+        tabIndex.value = tabController.index;
+      });
+      return null;
+    }, [tabController]);
 
     final clubRepo = useProvider(clubProvider(_initClub));
     final club = useProvider(clubProvider(_initClub).state);
     final eventsRepo = useProvider(eventByClubProvider);
     final events = useProvider(eventByClubProvider.state);
-    
+
     final bookmarks = useProvider(bookmarkClubProvider);
 
     useEffect((){
@@ -70,10 +78,15 @@ class ClubScreen extends HookWidget{
     final contactInfo = club?.contactInfo ?? [];
     final snsInfo = club?.snsInfo ?? [];
 
-    final key = GlobalKey<ScaffoldState>();
+    final scaffoldKey = useState(GlobalKey<ScaffoldState>());
+
+    useEffect((){
+      analytics.logViewItem(itemId: club.id, itemName: club.name, itemCategory: 'club_page_open');
+      return null;
+    }, []);
 
     return Scaffold(
-      key: key,
+      key: scaffoldKey.value,
       extendBodyBehindAppBar: true,
       floatingActionButton:
         [2, 3].contains(tabIndex.value) ? null : FloatingActionButton.extended(
@@ -82,7 +95,6 @@ class ClubScreen extends HookWidget{
           onPressed: () => _moveToChatScreen(context, club.id),
         ),
       appBar: AppBar(
-        elevation: 0,
         toolbarHeight: 50,
         backgroundColor: Colors.black.withOpacity(0.2),
         actions: [
@@ -94,7 +106,7 @@ class ClubScreen extends HookWidget{
               if(item == MenuItems.report){
                 final result = await ReportDialog.showClubReport(context, club);
                 if(result ?? false){
-                  ShowSnackBar.show(key.currentState, '通報を完了しました');
+                  ShowSnackBar.show(scaffoldKey.value.currentState, '通報を完了しました');
                 }
               }
             },
@@ -146,11 +158,36 @@ class ClubScreen extends HookWidget{
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              club.name,
-                              style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                fontWeight: FontWeight.bold,
-                              )
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    club.name,
+                                    maxLines: 2,
+                                    style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                bookmarks.when(
+                                  loading: () => const InkWell(child: Icon(Icons.bookmark)),
+                                  error: (dynamic _, __) => const InkWell(child: Icon(Icons.bookmark)),
+                                  data: (data) => InkWell(
+                                    onTap: () => () => bookmarks.data.value.containsClubId(club.id)
+                                        ? unbookmarkClub(bookmarks.data.value.getWithClubId(club.id))
+                                        : bookmarkClub(club.id),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      child: Icon(
+                                        data.containsClubId(club.id) ? Icons.bookmark : Icons.bookmark_border,
+                                        color: data.containsClubId(club.id) ?? false ? Colors.cyan[600] : Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             Text(
                               club.genre?.join(' ') ?? '',
@@ -161,77 +198,16 @@ class ClubScreen extends HookWidget{
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
-                                  child: Row(
+                                  child: Wrap(
+                                    spacing: 8,
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.cyan,
-                                          border:Border.all(
-                                            width: 1,
-                                            color: Colors.cyan,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          '公認',
-                                          style: Theme.of(context).textTheme.caption.copyWith(
-                                            // backgroundColor: Colors.cyan[400],
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                                        padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border:Border.all(
-                                            width: 1,
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          '体育会',
-                                          style: Theme.of(context).textTheme.caption.copyWith(
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                      ),
+                                      Badge.clubType(club.clubType),
+                                      if(club.isOfficial)
+                                        const Badge.official(),
+                                      if(club.isIntercollege)
+                                        const Badge.interCollege(),
                                     ],
                                   ),
-                                ),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.share),
-                                      onPressed: () => print('share'),
-                                    ),
-                                    bookmarks.when(
-                                      data: (data) => IconButton(
-                                        icon: Icon(
-                                          data.containsClubId(club.id) ? Icons.bookmark : Icons.bookmark_border,
-                                          color: data.containsClubId(club.id) ? Colors.cyan[600] : Colors.black,
-                                        ),
-                                        onPressed: () => bookmarks.data.value.containsClubId(club.id)
-                                            ? unbookmarkClub(bookmarks.data.value.getWithClubId(club.id))
-                                            : bookmarkClub(club.id),
-                                      ),
-                                      loading: () => const IconButton(
-                                          icon: Icon(
-                                            Icons.bookmark_border,
-                                            color: Colors.transparent,
-                                          ),
-                                          onPressed: null,
-                                        ),
-                                      error: (dynamic _, __) => const IconButton(
-                                        icon: Icon(
-                                          Icons.bookmark_border,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: null,
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ],
                             ),
@@ -245,174 +221,172 @@ class ClubScreen extends HookWidget{
                 ]
               )
             ),
-
-            Divider(
-              thickness: 8,
-              height: 8,
-              color: Colors.grey[200],
-            ),
-
             
-            TabBar(
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicator: const BubbleTabIndicator(
-                indicatorHeight: 30,
-                tabBarIndicatorSize: TabBarIndicatorSize.tab,
-                indicatorColor: Colors.cyan,
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(
+                  color: Colors.grey[200],
+                  width: 2,
+                )),
               ),
-              controller: tabController,
-              isScrollable: true,
-              labelColor: Colors.white,
-              labelStyle: const TextStyle(
-                textBaseline: TextBaseline.ideographic,
+              child: Center(
+                child: TabBar(
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicator: const BubbleTabIndicator(
+                    indicatorHeight: 30,
+                    tabBarIndicatorSize: TabBarIndicatorSize.tab,
+                    indicatorColor: Colors.orange,
+                  ),
+                  controller: tabController,
+                  isScrollable: true,
+                  labelColor: Colors.white,
+                  labelStyle: const TextStyle(
+                    textBaseline: TextBaseline.ideographic,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    textBaseline: TextBaseline.ideographic,
+                  ),
+                  unselectedLabelColor: Colors.black,
+                  tabs: const [
+                    Tab(text: '活動'),
+                    Tab(text: '雰囲気'),
+                    Tab(text: 'イベント'),
+                    // Tab(text: 'タイムライン'),
+                    Tab(text: '情報'),
+                    Tab(text: 'SNS/連絡先'),
+                  ],
+                ),
               ),
-              unselectedLabelStyle: const TextStyle(
-                textBaseline: TextBaseline.ideographic,
-              ),
-              unselectedLabelColor: Colors.black,
-              tabs: const [
-                Tab(text: '活動'),
-                Tab(text: '雰囲気'),
-                Tab(text: 'イベント'),
-                // Tab(text: 'タイムライン'),
-                Tab(text: '情報'),
-                Tab(text: 'SNS/連絡先'),
-              ],
             ),
 
-            // TabBar(
-            //   controller: tabController,
-            //   isScrollable: true,
-            //   labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-            //   labelColor: Colors.black,
-            //   labelStyle: Theme.of(context).textTheme.bodyText1.copyWith(
-            //     fontSize: 12,
-            //   ),
-            //   tabs: const [
-            //     Tab(text: '活動内容'),
-            //     Tab(text: '雰囲気'),
-            //     Tab(text: 'イベント'),
-            //     Tab(text: 'タイムライン'),
-            //     Tab(text: '情報'),
-            //     Tab(text: 'SNS/連絡先'),
-            //   ],
+            // Divider(
+            //   thickness: 8,
+            //   height: 8,
+            //   color: Colors.grey[200],
             // ),
 
             Expanded(
-              child: Column(
+              child: TabBarView(
+                controller: tabController,
                 children: [
-                  Flexible(
-                    child: TabBarView(
-                      controller: tabController,
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildPassage('団体紹介', club.description),
-                              _buildPassage('活動日', club.freq_display),
-                              _buildPassage('メンバーの説明', club.member_display),
-                              _buildPassage('活動場所', club.place_display),
-                              _buildPassage('費用', club.cost_display),
-                              _buildPassage('大会・発表会など', club.competition_display),
-                              const SizedBox(height: 100),
-                            ].where((e) => e != null).toList(),
-                          ),
-                        ),
-                        SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildPassage('活動への参加', club.obligation_display),
-                              _buildPassage('モチベーション', club.motivation_display),
-                              _buildPassage('飲み会', club.drinking_display),
-                              _buildPassage('イベント', club.event_display),
-                              _buildPassage('合宿・旅行', club.trip_display),
-                              const SizedBox(height: 100),
-                            ].where((e) => e != null).toList(),
-                          ),
-                        ),
-                        Container(
-                          child: ListView(
-                            padding: EdgeInsets.zero,
-                            // FIXME EventCardを流用しない
-                            children: [
-                              ...events.map((e) =>
-                                EventCard(
-                                  event: e,
-                                  onTap: () => Navigator.of(context).push(MaterialPageRoute<EventScreen>(builder: (_) => EventScreen(event: e))),
-                                )
-                              ).toList(),
-                              SizedBox(height: MediaQuery.of(context).viewPadding.bottom)
-                            ]
-                          ),
-                        ),
-                        // Container(
-                        //   child: const Text('投稿一覧'),
-                        // ),
-                        SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildQandA(context, '部員数', '${club.memberCount}人'),
-                              const Divider(),
-                              _buildQandA(context, '男女比', '男：女 = ${club.genderRatio.toFormatRatio()}'),
-                              const Divider(),
-                              _buildQandA(context, '主に活動しているキャンパス', '${club.campus.format}'),
-                              const Divider(),
-                              _buildQandA(context, 'インカレか', club.isIntercollege ? 'Yes': 'No'),
-                              const Divider(),
-                              _buildQandA(context, '自分の大学の割合', '${club.kuRatio?.toFormatPercentage()}'),
-                              if(club.isCompany != null) ...[
-                                const Divider(),
-                                _buildQandA(context, '会社団体か', club.isCompany ? 'Yes': 'No'),
-                              ],
-                              if(club.hasSchoolRestrict != null) ...[
-                                const Divider(),
-                                _buildQandA(context, '学部制限があるか', club.hasSchoolRestrict ? 'Yes': 'No'),
-                              ],
-                              const SizedBox(height: 100),
-                            ].where((e) => e != null).toList(),
-                          ),
-                        ),
-                        SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildHeader('ホームページ'),
-                              if(club.homepageUrl == null)
-                                const Center(child: Text('ホームページは登録されていません')),
-                              if(club.homepageUrl != null) ...[
-                                _buildListTile(context, title: 'ホームページ', subtitle: club.homepageUrl, onTap: () async {
-                                  await launch(club.homepageUrl);
-                                }),
-                              ],
-                              _buildHeader('SNS'),
-                              if(snsInfo.isEmpty)
-                                const Center(child: Text('SNSは登録されていません')),
-                              if(snsInfo.isNotEmpty)
-                                ...snsInfo.map((info) => [
-                                    _buildContact(context, info),
-                                    const Divider(height: 0),
-                                  ])
-                                  .expand((widget) => widget)
-                                  .toList()
-                                  ..removeLast(),
-                              _buildHeader('連絡先'),
-                              if(contactInfo.isEmpty)
-                                const Center(child: Text('連絡先は登録されていません')),
-                              if(contactInfo.isNotEmpty)
-                                ...contactInfo.map((info) => [
-                                    _buildContact(context, info),
-                                    const Divider(height: 0),
-                                  ])
-                                  .expand((widget) => widget)
-                                  .toList()
-                                  ..removeLast(),
-                            ].where((e) => e != null).toList(),
-                          ),
-                        ),
+                        _buildPassage('団体紹介', club.description),
+                        _buildPassage('活動日', club.freq_display),
+                        _buildPassage('メンバーの説明', club.member_display),
+                        _buildPassage('活動場所', club.place_display),
+                        _buildPassage('費用', club.cost_display),
+                        _buildPassage('大会・発表会など', club.competition_display),
+                        const SizedBox(height: 100),
+                      ].where((e) => e != null).toList(),
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildPassage('活動への参加', club.obligation_display),
+                        _buildPassage('モチベーション', club.motivation_display),
+                        _buildPassage('飲み会', club.drinking_display),
+                        _buildPassage('イベント', club.event_display),
+                        _buildPassage('合宿・旅行', club.trip_display),
+                        const SizedBox(height: 100),
+                      ].where((e) => e != null).toList(),
+                    ),
+                  ),
+                  Container(
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      // FIXME EventCardを流用しない
+                      children: [
+                        ...events.map((e) =>
+                          EventCard(
+                            event: e,
+                            onTap: () => Navigator.of(context).push(MaterialPageRoute<EventScreen>(builder: (_) => EventScreen(event: e))),
+                          )
+                        ).toList(),
+                        SizedBox(height: MediaQuery.of(context).viewPadding.bottom)
                       ]
+                    ),
+                  ),
+                  // Container(
+                  //   child: const Text('投稿一覧'),
+                  // ),
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Divider(color: Colors.transparent, height: 8),
+                        if(club.memberCount != null) ...[
+                          _buildQandA(context, '部員数', '${club.memberCount}人'),
+                          const Divider(),
+                        ],
+                        if(club.genderRatio != null) ...[
+                          _buildQandA(context, '男女比', '男：女 = ${club.genderRatio.toFormatRatio()}'),
+                          const Divider(),
+                        ],
+                        if(club.campus != null) ...[
+                          _buildQandA(context, '主に活動しているキャンパス', '${club.campus.map((campus) => campus.format).join()}'),
+                          const Divider(),
+                        ],
+                        if(club.isIntercollege != null) ...[
+                          _buildQandA(context, 'インカレか', club.isIntercollege ? 'Yes': 'No'),
+                          const Divider(),
+                        ],
+                        if(club.kuRatio != null) ...[
+                          _buildQandA(context, '自分の大学の割合', '${club.kuRatio?.toFormatPercentage()}'),
+                          const Divider(),
+                        ],
+                        if(club.isCompany != null) ...[
+                          _buildQandA(context, '会社団体か', club.isCompany ? 'Yes': 'No'),
+                          const Divider(),
+                        ],
+                        if(club.hasSchoolRestrict != null) ...[
+                          _buildQandA(context, '学部制限があるか', club.hasSchoolRestrict ? 'Yes': 'No'),
+                          const Divider(),
+                        ],
+                        const SizedBox(height: 100),
+                      ].where((e) => e != null).toList(),
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildHeader('ホームページ'),
+                        if(club.homepageUrl == null)
+                          const Center(child: Text('ホームページは登録されていません')),
+                        if(club.homepageUrl != null) ...[
+                          _buildListTile(context, title: 'ホームページ', subtitle: club.homepageUrl, onTap: () async {
+                            await launch(club.homepageUrl);
+                          }),
+                        ],
+                        _buildHeader('SNS'),
+                        if(snsInfo.isEmpty)
+                          const Center(child: Text('SNSは登録されていません')),
+                        if(snsInfo.isNotEmpty)
+                          ...snsInfo.map((info) => [
+                              _buildContact(context, info),
+                              const Divider(height: 0),
+                            ])
+                            .expand((widget) => widget)
+                            .toList()
+                            ..removeLast(),
+                        _buildHeader('連絡先'),
+                        if(contactInfo.isEmpty)
+                          const Center(child: Text('連絡先は登録されていません')),
+                        if(contactInfo.isNotEmpty)
+                          ...contactInfo.map((info) => [
+                              _buildContact(context, info),
+                              const Divider(height: 0),
+                            ])
+                            .expand((widget) => widget)
+                            .toList()
+                            ..removeLast(),
+                      ].where((e) => e != null).toList(),
                     ),
                   ),
                 ]

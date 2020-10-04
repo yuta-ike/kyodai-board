@@ -8,6 +8,7 @@ class MyPage extends HookWidget{
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 50,
+        automaticallyImplyLeading: false,
         title: Text(
           'マイページ',
           style: Theme.of(context).textTheme.bodyText1.copyWith(

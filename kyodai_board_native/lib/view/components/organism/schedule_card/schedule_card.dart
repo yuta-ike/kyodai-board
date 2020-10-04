@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:kyodai_board/model/enums/place.dart';
+import 'package:kyodai_board/model/enums/univ_grade.dart';
 import 'package:kyodai_board/model/event.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
 import 'package:kyodai_board/utils/date_extension.dart';
+import 'package:kyodai_board/view/components/atom/badge.dart';
+import 'package:kyodai_board/model/enums/apply_method.dart';
 import 'package:kyodai_board/view/components/atom/text_with_icon.dart';
 
 class ScheduleCard extends HookWidget{
@@ -85,18 +89,17 @@ class ScheduleCard extends HookWidget{
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Row(
+                        Wrap(
+                          spacing: 8,
                           children: [
-                            Container(
-                              color: Colors.cyan,
-                              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                              child: Text(
-                                '初心者歓迎',
-                                style: Theme.of(context).textTheme.caption.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            )
+                            if(schedule != null)
+                            Badge.clubType(schedule.club.clubType),
+                            if((schedule?.qualifiedGrades?.contains(UnivGrade.first) ?? false) && schedule?.qualifiedGrades?.length == 1)
+                              const Badge.freshman(),
+                            if(schedule?.applyMethods?.needApply ?? false)
+                              const Badge.needApply(),
+                            if(schedule?.meetingPlace == Place.online)
+                              const Badge.online(),
                           ],
                         ),
                       ]

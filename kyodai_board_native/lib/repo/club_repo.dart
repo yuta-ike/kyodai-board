@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -11,13 +10,13 @@ import 'package:state_notifier/state_notifier.dart';
 
 final clubSearchProvider = FutureProvider.autoDispose.family<List<Club>, ClubQuery>((ref, clubQuery) async {
   final firestore = ref.read(firestoreProvider);
-  Query query = firestore.state.collection('clubs')/*.orderBy('updatedAt')*/;
+  var query = firestore.state.collection('clubs').orderBy('updatedAt');
 
+  // ClubType
   if(clubQuery.clubTypes.map((e) => e.keyString).toList().isEmpty){
     return [];
   }
-
-  query = query.where('profile.clubType', whereIn: clubQuery.clubTypes.map((e) => e.keyString).toList());
+  query = query.where('clubType', whereIn: clubQuery.clubTypes.map((e) => e.keyString).toList());
 
   final snapshots = await query.get();
   if(snapshots.size == 0){
@@ -26,11 +25,12 @@ final clubSearchProvider = FutureProvider.autoDispose.family<List<Club>, ClubQue
   
   var clubs = snapshots.docs.map((snapshot) => Club.fromMap(snapshot.id, snapshot.data()));
 
-
+  // daysOfWeek
   clubs = clubs.where((club){
     return clubQuery.daysOfWeek.toSet().containsAll(club.daysOfWeek);
   });
 
+  // memberCount
   final memberCountStart = memberCountChoices[clubQuery.memberCount.start.floor()];
   final memberCountEnd = memberCountChoices[clubQuery.memberCount.end.floor()];
   if(memberCountStart != null){
@@ -40,6 +40,7 @@ final clubSearchProvider = FutureProvider.autoDispose.family<List<Club>, ClubQue
     clubs = clubs.where((club) => club.memberCount <= memberCountEnd);
   }
 
+  // genderRatio
   if(clubQuery.genderRatio != null){
     if(clubQuery.genderRatio == GenderRatioChoice.male){
       clubs = clubs.where((club) => club.genderRatio >= 0.7);
@@ -50,22 +51,25 @@ final clubSearchProvider = FutureProvider.autoDispose.family<List<Club>, ClubQue
     }
   }
 
+  // campus
   if(clubQuery.campus != null){
     if(clubQuery.campus == CampusChoice.yoshida){
-      clubs = clubs.where((club) => <Campus>[Campus.yoshidaMain, Campus.yoshidaNorth, Campus.yoshidaOthers, Campus.yoshidaSouth, Campus.yoshidaWest].contains(club.campus));
+      clubs = clubs.where((club) => club.campus.contains(Campus.yoshida));
     }else if(clubQuery.campus == CampusChoice.uji){
-      clubs = clubs.where((club) => club.campus == Campus.uji);
+      clubs = clubs.where((club) => club.campus.contains(Campus.uji));
     }else if(clubQuery.campus == CampusChoice.katsura){
-      clubs = clubs.where((club) => club.campus == Campus.katsura);
+      clubs = clubs.where((club) => club.campus.contains(Campus.katsura));
     }else if(clubQuery.campus == CampusChoice.others){
-      clubs = clubs.where((club) => club.campus == Campus.others);
+      clubs = clubs.where((club) => club.campus.contains(Campus.others));
     }
   }
 
+  // isOfficial
   if(clubQuery.isOfficial == true){
     clubs = clubs.where((club) => club.isOfficial == true);
   }
 
+  // isIntercollege
   if(clubQuery.isIntercollege == false){
     clubs = clubs.where((club) => club.isIntercollege == false);
   }
@@ -84,6 +88,7 @@ final clubSearchProvider = FutureProvider.autoDispose.family<List<Club>, ClubQue
   //     clubs = clubs.where((club) => choices.contains(club.freq));
   //   }
   // }
+  print(clubs);
 
   return clubs.toList();
 });
@@ -91,9 +96,19 @@ final clubSearchProvider = FutureProvider.autoDispose.family<List<Club>, ClubQue
 class ClubListRepository extends StateNotifier<List<Club>>{
   ClubListRepository(): super([]);
 
+  int fetchCount = 0;
+
   Future<void> fetch() async {
+    print("fetch");
     final snapshots = await fsinstance.collection('clubs').get();
     state = snapshots.docs.map((snapshot) => Club.fromMap(snapshot.id, snapshot.data())).toList();
+    fetchCount += 1;
+  }
+
+  Future<void> fetchIfEmpty() async {
+    if(fetchCount == 0){
+      await fetch();
+    }
   }
 
   Future<void> filter(ClubType type) async {

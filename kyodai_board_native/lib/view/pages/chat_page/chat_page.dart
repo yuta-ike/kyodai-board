@@ -25,6 +25,7 @@ class ChatPage extends HookWidget{
       appBar: AppBar(
         toolbarHeight: 50,
         title: const Text('チャットルーム一覧'),
+        automaticallyImplyLeading: false,
       ),
       bottomNavigationBar: BottomNavigation(),
       body: Column(

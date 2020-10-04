@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kyodai_board/model/club.dart';
+import 'package:kyodai_board/model/enums/club_type.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
+import 'package:kyodai_board/view/components/atom/badge.dart';
 
 class ClubCard extends StatelessWidget{
   const ClubCard(this.club, { this.isBookmarked, this.bookmark, this.onTap });
@@ -72,29 +74,18 @@ class ClubCard extends StatelessWidget{
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          club.genre.join('  '),
-                          maxLines: 1,
-                          style: Theme.of(context).textTheme.caption,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
                           children: [
-                            Container(
-                              color: Colors.cyan,
-                              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                              child: Text(
-                                '公認',
-                                style: Theme.of(context).textTheme.caption.copyWith(
-                                  // backgroundColor: Colors.cyan[400],
-                                  color: Colors.white,
-                                ),
-                              ),
-                            )
+                            Badge.clubType(club.clubType),
+                            if(club.isOfficial)
+                              const Badge.official(),
+                            if(club.isIntercollege)
+                              const Badge.interCollege(),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         Text(
                           club.description,
                           maxLines: 1,

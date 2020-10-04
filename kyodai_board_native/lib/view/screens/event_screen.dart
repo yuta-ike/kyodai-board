@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kyodai_board/firebase/analytics.dart';
+import 'package:kyodai_board/model/enums/place.dart';
+import 'package:kyodai_board/model/enums/univ_grade.dart';
 import 'package:kyodai_board/model/event.dart';
 import 'package:kyodai_board/repo/board_repo.dart';
 import 'package:kyodai_board/repo/user_repo.dart';
 import 'package:kyodai_board/view/components/atom/async_image.dart';
 import 'package:kyodai_board/utils/date_extension.dart';
+import 'package:kyodai_board/view/components/atom/badge.dart';
 import 'package:kyodai_board/view/mixins/club_report_dialog.dart';
 import 'package:kyodai_board/view/mixins/show_snackbar.dart';
 import 'package:kyodai_board/view/screens/club_screen.dart';
@@ -106,7 +110,6 @@ class EventScreen extends HookWidget{
   Widget build(BuildContext context) {
     final event = useProvider(eventDetailProvider(_event).state);
     final eventRepo = useProvider(eventDetailProvider(_event));
-    final iconUrl = useState('');
     
     final showAllSchedule = useState(true);
 
@@ -116,23 +119,20 @@ class EventScreen extends HookWidget{
       eventRepo.fetchIfNeed(schedule);
       return null;
     }, []);
-    
-    useEffect((){
-      if(event != null){
-        iconUrl.value = event.club.iconImageUrl;
-      }
-      return null;
-    }, [event != null]);
 
-    final key = GlobalKey<ScaffoldState>();
+    final scaffoldKey = useState(GlobalKey<ScaffoldState>());
+
+    useEffect((){
+      analytics.logViewItem(itemId: schedule.eventId, itemName: schedule.title, itemCategory: 'event_page_open');
+      return null;
+    }, []);
 
     return Scaffold(
-      key: key,
+      key: scaffoldKey.value,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         toolbarHeight: 40,
         backgroundColor: Colors.black.withOpacity(0.1),
-        elevation: 0,
         iconTheme: Theme.of(context).iconTheme.copyWith(
           color: Colors.white,
         ),
@@ -145,7 +145,7 @@ class EventScreen extends HookWidget{
               if(item == MenuItems.report){
                 final result = await ReportDialog.showEventReport(context, event);
                 if(result ?? false){
-                  ShowSnackBar.show(key.currentState, '通報を完了しました');
+                  ShowSnackBar.show(scaffoldKey.value.currentState, '通報を完了しました');
                 }
               }
             },
@@ -182,13 +182,17 @@ class EventScreen extends HookWidget{
                         builder: (_) => ClubScreen(clubId: event.clubId)
                       )
                     ),
-                    child: AsyncImage(
-                      imageUrl: iconUrl.value,
-                      imageBuilder: (_, image) => CircleAvatar(
+                    child: event == null ? const CircleAvatar(
                         radius: 24,
-                        backgroundImage: image,
+                        backgroundColor: Colors.grey,
+                      ) :
+                      AsyncImage(
+                        imageUrl: event?.club?.iconImageUrl ?? '',
+                        imageBuilder: (_, image) => CircleAvatar(
+                          radius: 24,
+                          backgroundImage: image,
+                        ),
                       ),
-                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -236,42 +240,17 @@ class EventScreen extends HookWidget{
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Row(
+                        Wrap(
+                          spacing: 8,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.cyan,
-                                border:Border.all(
-                                  width: 1,
-                                  color: Colors.cyan,
-                                ),
-                              ),
-                              child: Text(
-                                '初心者歓迎',
-                                style: Theme.of(context).textTheme.caption.copyWith(
-                                  // backgroundColor: Colors.cyan[400],
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 6),
-                              padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border:Border.all(
-                                  width: 1,
-                                  color: Colors.red,
-                                ),
-                              ),
-                              child: Text(
-                                '要予約',
-                                style: Theme.of(context).textTheme.caption.copyWith(
-                                  color: Colors.red,
-                                ),
-                              ),
-                            )
+                            if(event != null)
+                              Badge.clubType(event.club.clubType),
+                            if((event?.qualifiedGrades?.contains(UnivGrade.first) ?? false) && event?.qualifiedGrades?.length == 1)
+                              const Badge.freshman(),
+                            if(event?.applyMethods?.needApply ?? false)
+                              const Badge.needApply(),
+                            if(event?.meetingPlace == Place.online)
+                              const Badge.online(),
                           ],
                         ),
                       ]
@@ -433,19 +412,39 @@ class EventScreen extends HookWidget{
                       ),
                       child: Column(
                         children: [
-                          _buildInfo(context, '持ち物', event.belongings),
-                          const Divider(),
-                          _buildInfo(context, '集合場所', event.place_display),
-                          const Divider(),
-                          _buildInfo(context, '実施場所', event.meetingPlace_display),
-                          const Divider(),
-                          _buildInfo(context, '雨天時', event.weatherCancel_display),
-                          const Divider(),
-                          _buildInfo(context, '注意事項', event.notes),
-                          const Divider(),
-                          _buildInfo(context, '連絡先', event.contact),
-                          const Divider(),
-                          _buildInfo(context, '当日連絡先', event.contactCurrentDay),
+                            const Divider(),
+                          if(event.belongings.isNotEmpty) ...[
+                            _buildInfo(context, '持ち物', event.belongings),
+                            const Divider(),
+                          ],
+                          if(event.place_display.isNotEmpty) ...[
+                            _buildInfo(context, '集合場所', event.place_display),
+                            const Divider(),
+                          ],
+                          if(event.meetingPlace_display.isNotEmpty) ...[
+                            _buildInfo(context, '実施場所', event.meetingPlace_display),
+                            const Divider(),
+                          ],
+                          if(event.weatherCancel_display.isNotEmpty) ...[
+                            _buildInfo(context, '雨天時', event.weatherCancel_display),
+                            const Divider(),
+                          ],
+                          if(event.notes.isNotEmpty) ...[
+                            _buildInfo(context, '注意事項', event.notes),
+                            const Divider(),
+                          ],
+                          if(event.contact.isNotEmpty) ...[
+                            _buildInfo(context, '連絡先', event.contact),
+                            const Divider(),
+                          ],
+                          if(event.contactCurrentDay.isNotEmpty) ...[
+                            _buildInfo(context, '当日連絡先', event.contactCurrentDay),
+                            const Divider(),
+                          ],
+                          if(event.infectionNotes.isNotEmpty) ...[
+                            _buildInfo(context, '感染症対策', event.infectionNotes),
+                            const Divider(),
+                          ]
                         ],
                       ),
                     ),
